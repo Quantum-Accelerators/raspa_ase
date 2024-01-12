@@ -174,15 +174,18 @@ class RaspaTemplate(CalculatorTemplate):
             structure = AseAtomsAdaptor.get_structure(framework)
             structure.to(str(Path(directory, name + ".cif")))
 
+        def _write_list(v: list[Any]) -> str:
+            return " ".join([str(i) for i in v]) + "\n"
+
+        def _write_dict(v: dict[Any, Any]) -> str:
+            return "\n".join([f"    {k} {v}" for k, v in v.items()]) + "\n"
+
         for k, v in parameters.items():
             simulation_input += f"{k}\n"
             if isinstance(v, dict):
-                for k2, v2 in v.items():
-                    simulation_input += f"    {k2} {v2}\n"
+                simulation_input += _write_dict(v)
             elif isinstance(v, list):
-                for i in v:
-                    simulation_input += f" {i}"
-                simulation_input += "\n"
+                simulation_input += _write_list(v)
             else:
                 simulation_input += f" {v}\n"
 
