@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from ase.calculators.genericfileio import CalculatorTemplate, GenericFileIOCalculator
-from ase.io import write
+from pymatgen.io.ase import AseAtomsAdaptor
 
 if TYPE_CHECKING:
     from typing import Any, TypedDict
@@ -171,20 +171,20 @@ class RaspaTemplate(CalculatorTemplate):
                 f"framework {i}": {"frameworkname": name, "unitcells": n_cells}
                 | framework.info
             }
-            write(Path(directory, name + ".cif"), framework)
+            structure = AseAtomsAdaptor.get_structure(framework)
+            structure.to(str(Path(directory, name + ".cif")))
 
         for k, v in parameters.items():
+            simulation_input += f"{k}\n"
             if isinstance(v, dict):
-                simulation_input += f"{k} {v}\n"
                 for k2, v2 in v.items():
                     simulation_input += f"    {k2} {v2}\n"
             elif isinstance(v, list):
-                simulation_input += f"{k}"
                 for i in v:
                     simulation_input += f" {i}"
                 simulation_input += "\n"
             else:
-                simulation_input += f"{k} {v}\n"
+                simulation_input += f" {v}\n"
 
         with Path(directory, "simulation.input").open(mode="w") as fd:
             fd.write(simulation_input)
