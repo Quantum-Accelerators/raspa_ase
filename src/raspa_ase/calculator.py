@@ -3,15 +3,16 @@ ASE calculator for RASPA_ase
 """
 from __future__ import annotations
 
+import logging
 import os
-from collections.abc import Iterable
 from pathlib import Path
 from subprocess import check_call
 from typing import TYPE_CHECKING
 
-import numpy as np
 from ase.calculators.genericfileio import CalculatorTemplate, GenericFileIOCalculator
-from pymatgen.io.ase import AseAtomsAdaptor
+
+from raspa_ase._io import write_frameworks, write_simulation_input
+from raspa_ase._params import get_framework_params, sanitize_parameters
 
 if TYPE_CHECKING:
     from typing import Any, TypedDict
@@ -22,29 +23,27 @@ if TYPE_CHECKING:
         pass
 
 
-# TODO:
-# - Take a list of Atoms as the frameworks
-# - Take a list of Atoms as the molecules
-# - Take a list of blank Atoms() as the Boxes
-# atoms.get_cell().array for BoxMatrix
+logger = logging.getLogger(__name__)
+
+SIMULATION_INPUT = "simulation.input"
+LABEL = "raspa"
 
 
-# - Use logger for n_cells
-# - Allow user to override n_cell changes
-# - Warn if the other env vars aren't set in the manual
 class RaspaProfile:
     """
-    RASPA profile
+    RASPA profile, which defines the command that will be executed and where.
     """
 
     def __init__(self, argv: list[str] | None = None) -> None:
         """
-        Initialize the RASPA profile.
+        Initialize the RASPA profile. $RASPA_DIR must be set in the environment.
 
         Parameters
         ----------
         argv
             The command line arguments to the RASPA executable.
+            This defaults to doing `${RASPA_DIR}/bin/simulate simulation.input`
+            and typically does not need to be changed.
 
         Returns
         -------
@@ -53,7 +52,7 @@ class RaspaProfile:
         raspa_dir = os.environ.get("RASPA_DIR")
         if not raspa_dir:
             raise EnvironmentError("RASPA_DIR environment variable not set")
-        self.argv = argv or [f"{raspa_dir}/bin/simulate", "simulate.input"]
+        self.argv = argv or [f"{raspa_dir}/bin/simulate", "{SIMULATION_INPUT}"]
 
     def run(
         self,
@@ -68,7 +67,7 @@ class RaspaProfile:
         directory
             The directory where the calculation will be run.
         output_filename
-            The name of the log file to write to in the directory.
+            The name of the logfile to write to in the directory.
 
         Returns
         -------
@@ -80,7 +79,7 @@ class RaspaProfile:
 
 class RaspaTemplate(CalculatorTemplate):
     """
-    RASPA template
+    RASPA template, used to define how to read and write RASPA files.
     """
 
     def __init__(self) -> None:
@@ -101,7 +100,7 @@ class RaspaTemplate(CalculatorTemplate):
             implemented_properties=["energy"],
         )
 
-        self.input_file = f"simulation.input"
+        self.input_file = SIMULATION_INPUT
         self.output_file = f"{label}.out"
 
     def execute(self, directory: Path | str, profile: RaspaProfile) -> None:
@@ -123,11 +122,11 @@ class RaspaTemplate(CalculatorTemplate):
 
     def write_input(
         self,
-        profile: RaspaProfile,  # skipcq: PYL-W0613
         directory: Path | str,
-        atoms: Atoms | list[Atoms],
-        properties: Any,  # skipcq: PYL-W0613
+        atoms: Atoms,
         parameters: dict[str, Any],
+        profile: RaspaProfile,  # skipcq: PYL-W0613
+        properties: Any,  # skipcq: PYL-W0613
     ) -> None:
         """
         Write the RASPA input files.
@@ -137,9 +136,11 @@ class RaspaTemplate(CalculatorTemplate):
         directory
             The path to the directory to write the RASPA input files in.
         atoms
-            The ASE atoms object(s) to write.
+            The ASE atoms object to use as the framework.
         parameters
             The RASPA parameters to use, formatted as a dictionary.
+        profile
+             This is needed the base class and should not be explicitly specified.
         properties
             This is needed the base class and should not be explicitly specified.
 
@@ -147,84 +148,17 @@ class RaspaTemplate(CalculatorTemplate):
         -------
         None
         """
-        simulation_input = ""
-        frameworks = atoms if isinstance(atoms, list) else [atoms]
+        frameworks = [atoms]
 
-        # TODO: do this recursively
-        parameters = {
-            k: "Yes" if v is True else "No" if v is False else v
-            for k, v in parameters.items()
-        }
+        parameters = sanitize_parameters(parameters)
+        parameters |= get_framework_params(frameworks)
 
-        reserved = ["framework", "frameworkname", "usechargesfromciffile"]
-        for key in reserved:
-            if key in parameters:
-                raise ValueError(f"{key} is a reserved parameter name.")
-
-        cutoff = 12.0
-        for k, v in parameters.items():
-            if k.lower() == "cutoff":
-                cutoff = v
-                break
-
-        # TODO: Add support for writing charges to CIF
-        # with _atom_site_charge and in RASPA set UseChargesFromCIFFile yes
-
-        for i, framework in enumerate(frameworks):
-            name = f"framework{i}"
-            A, B, C = framework.get_cell()[:3]
-
-            def _calculate_min_dist(v1, v2, v3):
-                cross_product = np.cross(v1, v2)
-                numerator = np.linalg.norm(np.dot(cross_product, v3))
-                denominator = np.linalg.norm(cross_product)
-                return np.divide(numerator, denominator)
-
-            min_A = _calculate_min_dist(B, C, A)
-            min_B = _calculate_min_dist(C, A, B)
-            min_C = _calculate_min_dist(A, B, C)
-            n_cells = [
-                int(np.ceil(float(cutoff) / (0.5 * min_i)))
-                for min_i in [min_A, min_B, min_C]
-            ]
-            parameters |= {
-                f"Framework {i}": {"FrameworkName": name, "UnitCells": n_cells}
-                | framework.info
-            }
-            structure = AseAtomsAdaptor.get_structure(framework)
-            structure.to(str(Path(directory, name + ".cif")))
-
-        def _write_iterable(v: list[Any]) -> str:
-            return " ".join([str(i) for i in v]) + "\n"
-
-        def _write_dict(d: dict[Any, Any]) -> str:
-            s = ""
-            for k, v in d.items():
-                s += f"    {k} "
-                if isinstance(v, dict):
-                    s += _write_dict(v)
-                elif isinstance(v, Iterable) and not isinstance(v, str):
-                    s += _write_iterable(v)
-                else:
-                    s += f"{v}\n"
-            return s
-
-        for k, v in parameters.items():
-            if isinstance(v, dict):
-                simulation_input += f"{k}\n"
-                simulation_input += _write_dict(v)
-            elif isinstance(v, list):
-                simulation_input += f"{k} "
-                simulation_input += _write_iterable(v)
-            else:
-                simulation_input += f"{k} {v}\n"
-
-        with Path(directory, "simulation.input").open(mode="w") as fd:
-            fd.write(simulation_input)
+        write_simulation_input(parameters, directory / SIMULATION_INPUT)
+        write_frameworks(frameworks, directory)
 
     def read_results(self, directory: Path | str) -> Results:
         """
-        Use cclib to read the results from the RASPA calculation.
+        Read the results of a RASPA calculation.
 
         Parameters
         ----------
@@ -238,33 +172,152 @@ class RaspaTemplate(CalculatorTemplate):
         """
         return {}
 
-    def load_profile(self, cfg, **kwargs):
+    def load_profile(self, cfg, **kwargs) -> RaspaProfile:
+        """
+        Load the RASPA profile.
+
+        Parameters
+        ----------
+        cfg
+            The RASPA configuration file, if any.
+        **kwargs
+            Any additional arguments to pass to the RASPA profile.
+
+        Returns
+        -------
+        RaspaProfile
+            The RASPA profile.
+        """
         return RaspaProfile.from_config(cfg, self.name, **kwargs)
 
 
 class Raspa(GenericFileIOCalculator):
     """
-    RASPA calculator
+    The RASPA calculator.
     """
 
     def __init__(
         self,
         profile: RaspaProfile | None = None,
         directory: Path | str = ".",
-        n_cells: tuple[int, int, int] | None = None,
+        boxes: list[dict[str, Any]] | None = None,
+        components: list[dict[str, Any]] | None = None,
         **kwargs,
     ) -> None:
         """
-        Initialize the RASPA calculator.
+        Initialize the RASPA calculator. The $RASPA_DIR environment variable must
+        be set.
+
+        This calculator is to be set on an `Atoms` object, which will be the
+        framework. All framework-related parameters should be set in the `Atoms.info`
+        dictionary.
+
+        Example:
+
+            If you have an ASE `Atoms` object of the MFI zeolite ("atoms"), then:
+
+            ```python
+            atoms.info = {"HeliumVoidFraction": 0.29}
+            ```
+
+            would be written out as the following:
+
+            ```
+            Framework 0
+                FrameworkName framework0
+                UnitCells 12 12 12
+                HeliumVoidFraction 0.29
+            ```
+
+            The `FrameworkName` is automaticallly set by the calculator.
+            The UnitCells parameter will be automatically set to prevent spurious
+            interactions between periodic images based on the cutoff,
+            if the parameter is not already supplied by the user.
+
+            To use partial atomic charges on the framework, set the `Atoms.set_initial_charges`
+            method on the `Atoms` object. The charges will be written out to the CIF file
+            and `UseChargesFromCIFFile` will be set to `yes` in the `simulation.input` file.
 
         Parameters
         ----------
         profile
-            An instantiated [RASPA_ase.calculator.RASPAProfile][] object to use.
+            An instantiated [raspa_ase.calculator.RaspaProfile][] object to use.
+            The default is typically fine, which runs the following:
+            `$RASPA_DIR/bin/simulate simulation.input`.
         directory
-            The path to the directory to run the RASPA calculation in.
+            The path to the directory to run the RASPA calculation in, which
+            defaults to the current working directory.
+        boxes
+            A list of dictionaries, where each dictionary is a RASPA box.
+            The default is an empty list.
+
+            Example:
+
+                ```python
+                boxes = [{"BoxLengths": [25, 25, 25], "ExternalTemperature": 300.0, "Movies": True, "WriteMoviesEvery": 10}, {"BoxLengths": [30, 30, 30], "BoxAngles": [90, 120, 90], "ExternalTemperature": 500.0, "Movies": True, "WriteMoviesEvery": 10}]
+                ```
+
+                would be written out as the following from 4.2 Example 2 of the RASPA manual:
+
+                ```
+                Box 0
+                    BoxLengths 25 25 25
+                    ExternalTemperature 300.0
+                    Movies yes
+                    WriteMoviesEvery 10
+                Box 1
+                    BoxLengths 30 30 30
+                    BoxAngles 90 120 90
+                    ExternalTemperature 500.0
+                    Movies yes
+                    WriteMoviesEvery 10
+                ```
+        components
+            A list of dictionaries, where each dictionary is a RASPA component.
+            The default is an empty list.
+
+            Example:
+
+                ```python
+                components = [{"MolelculeName": "N2", "MoleculeDefinition": "ExampleDefinition", "TranslationProbability": 1.0, "RotationProbability": 1.0, "ReinsertionProbability": 1.0, "CreateNumberOfMolecules": [50, 25]}, {"MoleculeName": "CO2", "MoleculeDefinition": "ExampleDefinitions", "TranslationProbability": 1.0, "RotationProbability": 1.0, "ReinsertionProbability": 1.0, "CreateNumberOfMolecules": [25, 50]}]
+                ```
+
+                would be written out as the following from 4.2 Example 2 of the RASPA manual:
+
+                ```
+                Component 0 MoleculeName N2
+                    MoleculeDefinition ExampleDefinitions
+                    TranslationProbability 1.0
+                    RotationProbability 1.0
+                    ReinsertionProbability 1.0
+                    CreateNumberOfMolecules 50 25
+                Component 1 MoleculeName CO2
+                    MoleculeDefinition ExampleDefinitions
+                    TranslationProbability 1.0
+                    RotationProbability 1.0
+                    ReinsertionProbability 1.0
+                    CreateNumberOfMolecules 25 50
+                ```
         **kwargs
-            Any additional RASPA parameters.
+            Any RASPA parameters beyond the Box and Component parameters, formatted as a dictionary.
+            Booleans will be converted to "Yes" or "No" automatically, and lists will be converted to
+            space-separated strings. The RASPA parameters are case-insensitive.
+
+            Example:
+
+                ```python
+                SimulationType="MonteCarlo", NumberOfCycles=10000, NumberOfInitializationCycles=1000, PrintEvery=100, ForceField="ExampleMoleculeForceField"
+                ```
+
+                would be written out as the following from 4.2 Example 2 of the RASPA manual:
+
+                ```
+                SimulationType MonteCarlo
+                NumberOfCycles 10000
+                NumberOfInitializationCycles 1000
+                PrintEvery 100
+                Forcefield ExampleMoleculeForceField
+                ```
 
         Returns
         -------
@@ -273,6 +326,14 @@ class Raspa(GenericFileIOCalculator):
 
         profile = profile or RaspaProfile()
         parameters = kwargs
+        boxes = boxes or []
+        components = components or []
+
+        for i, component in enumerate(components):
+            molecule_name = component.pop("MoleculeName")
+            parameters |= {f"Component {i} MoleculeName {molecule_name}": component}
+        for i, box in enumerate(boxes):
+            parameters |= {f"Box {i}": box}
 
         super().__init__(
             template=RaspaTemplate(),
