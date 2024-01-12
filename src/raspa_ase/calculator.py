@@ -4,6 +4,7 @@ ASE calculator for RASPA_ase
 from __future__ import annotations
 
 import os
+from collections.abc import Iterable
 from pathlib import Path
 from subprocess import check_call
 from typing import TYPE_CHECKING
@@ -21,6 +22,16 @@ if TYPE_CHECKING:
         pass
 
 
+# TODO:
+# - Take a list of Atoms as the frameworks
+# - Take a list of Atoms as the molecules
+# - Take a list of blank Atoms() as the Boxes
+# atoms.get_cell().array for BoxMatrix
+
+
+# - Use logger for n_cells
+# - Allow user to override n_cell changes
+# - Warn if the other env vars aren't set in the manual
 class RaspaProfile:
     """
     RASPA profile
@@ -116,7 +127,7 @@ class RaspaTemplate(CalculatorTemplate):
         directory: Path | str,
         atoms: Atoms | list[Atoms],
         properties: Any,  # skipcq: PYL-W0613
-        parameters: dict[str, Any] = None,
+        parameters: dict[str, Any],
     ) -> None:
         """
         Write the RASPA input files.
@@ -137,15 +148,24 @@ class RaspaTemplate(CalculatorTemplate):
         None
         """
         simulation_input = ""
-        parameters = (
-            {k.lower().strip(): v for k, v in parameters.items()} if parameters else {}
-        )
         frameworks = atoms if isinstance(atoms, list) else [atoms]
 
-        reserved = ["framework", "frameworkname", "usechargesfromciffile", "forcefield"]
+        # TODO: do this recursively
+        parameters = {
+            k: "Yes" if v is True else "No" if v is False else v
+            for k, v in parameters.items()
+        }
+
+        reserved = ["framework", "frameworkname", "usechargesfromciffile"]
         for key in reserved:
             if key in parameters:
                 raise ValueError(f"{key} is a reserved parameter name.")
+
+        cutoff = 12.0
+        for k, v in parameters.items():
+            if k.lower() == "cutoff":
+                cutoff = v
+                break
 
         # TODO: Add support for writing charges to CIF
         # with _atom_site_charge and in RASPA set UseChargesFromCIFFile yes
@@ -164,30 +184,40 @@ class RaspaTemplate(CalculatorTemplate):
             min_B = _calculate_min_dist(C, A, B)
             min_C = _calculate_min_dist(A, B, C)
             n_cells = [
-                int(np.ceil(float(parameters.get("cutoff", 12.0)) / (0.5 * min_i)))
+                int(np.ceil(float(cutoff) / (0.5 * min_i)))
                 for min_i in [min_A, min_B, min_C]
             ]
             parameters |= {
-                f"framework {i}": {"frameworkname": name, "unitcells": n_cells}
+                f"Framework {i}": {"FrameworkName": name, "UnitCells": n_cells}
                 | framework.info
             }
             structure = AseAtomsAdaptor.get_structure(framework)
             structure.to(str(Path(directory, name + ".cif")))
 
-        def _write_list(v: list[Any]) -> str:
+        def _write_iterable(v: list[Any]) -> str:
             return " ".join([str(i) for i in v]) + "\n"
 
-        def _write_dict(v: dict[Any, Any]) -> str:
-            return "\n".join([f"    {k} {v}" for k, v in v.items()]) + "\n"
+        def _write_dict(d: dict[Any, Any]) -> str:
+            s = ""
+            for k, v in d.items():
+                s += f"    {k} "
+                if isinstance(v, dict):
+                    s += _write_dict(v)
+                elif isinstance(v, Iterable) and not isinstance(v, str):
+                    s += _write_iterable(v)
+                else:
+                    s += f"{v}\n"
+            return s
 
         for k, v in parameters.items():
-            simulation_input += f"{k}\n"
             if isinstance(v, dict):
+                simulation_input += f"{k}\n"
                 simulation_input += _write_dict(v)
             elif isinstance(v, list):
-                simulation_input += _write_list(v)
+                simulation_input += f"{k} "
+                simulation_input += _write_iterable(v)
             else:
-                simulation_input += f" {v}\n"
+                simulation_input += f"{k} {v}\n"
 
         with Path(directory, "simulation.input").open(mode="w") as fd:
             fd.write(simulation_input)
@@ -221,6 +251,7 @@ class Raspa(GenericFileIOCalculator):
         self,
         profile: RaspaProfile | None = None,
         directory: Path | str = ".",
+        n_cells: tuple[int, int, int] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -232,18 +263,8 @@ class Raspa(GenericFileIOCalculator):
             An instantiated [RASPA_ase.calculator.RASPAProfile][] object to use.
         directory
             The path to the directory to run the RASPA calculation in.
-        method
-            The RASPA method to use. Case-insensitive.
-        charge
-            The net charge of the system.
-        uhf
-            The number of unpaired electrons in the system.
-        spinpol
-            Whether to use spin-polarized RASPA. If None, `spinpol` will be automatically
-            set to True if `uhf` > 0.
         **kwargs
-            Any additional RASPA parameters to be written out to a detailed input file, e.g. in the format
-            of `scc={"temp": 500}`. See https://github.com/grimme-lab/RASPA/blob/main/man/xcontrol.7.adoc.
+            Any additional RASPA parameters.
 
         Returns
         -------
@@ -251,10 +272,11 @@ class Raspa(GenericFileIOCalculator):
         """
 
         profile = profile or RaspaProfile()
+        parameters = kwargs
 
         super().__init__(
             template=RaspaTemplate(),
             profile=profile,
             directory=directory,
-            parameters=kwargs,
+            parameters=parameters,
         )
