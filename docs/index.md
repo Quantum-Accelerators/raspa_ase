@@ -1,5 +1,3 @@
 # raspa_ase
 
-Welcome to the documentation for the `raspa_ase` code! Here you will find everything you need to get started with your own Python package.
-
-**Check out the corresponding ⭐[YouTube tutorial](https://www.youtube.com/watch?v=th2CqJ6oBuM)⭐ for a video overview!**
+Welcome to the documentation for the `raspa_ase` code, an ASE calculator for the [RASPA](https://github.com/iRASPA/RASPA2) molecular simulation code.

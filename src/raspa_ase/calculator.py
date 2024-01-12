@@ -51,7 +51,7 @@ class RaspaProfile:
         """
         raspa_dir = os.environ.get("RASPA_DIR")
         if not raspa_dir:
-            raise EnvironmentError("RASPA_DIR environment variable not set")
+            raise OSError("RASPA_DIR environment variable not set")
         self.argv = argv or [f"{raspa_dir}/bin/simulate", "{SIMULATION_INPUT}"]
 
     def run(

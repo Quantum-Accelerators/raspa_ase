@@ -1,32 +1,10 @@
 site_name: raspa_ase
-site_author: YourName
+site_author: Andrew S. Rosen
 site_description: >-
-  This is the raspa_ase package!
+  An ASE calculator for RASPA.
 nav:
   - Home: index.md
-  - Overview:
-      - example_docs/intro/why.md
-      - example_docs/intro/resources.md
-  - Setup:
-      - example_docs/setup/prep.md
-      - example_docs/setup/name.md
-      - example_docs/setup/basics.md
-  - Installation:
-      - example_docs/installation/pyproject.md
-      - example_docs/installation/install.md
-  - Code:
-      - example_docs/code/source.md
-      - example_docs/code/hints.md
-      - example_docs/code/tests.md
-  - Documentation:
-      - example_docs/mkdocs/docs.md
-      - example_docs/mkdocs/build.md
-  - GitHub and CI:
-      - example_docs/github/commits.md
-      - example_docs/github/workflows.md
-  - Miscellaneous:
-      - example_docs/other/linting.md
-      - example_docs/other/apps.md
+      - installation/install.md
   - Code Documentation: reference/ # keep me!
   - About:
       - example_docs/about/changelog.md
@@ -108,6 +86,8 @@ plugins:
           import:
             - https://docs.python.org/3/objects.inv
             - https://numpy.org/doc/stable/objects.inv
+            - https://pymatgen.org/objects.inv
+            - https://wiki.fysik.dtu.dk/ase/objects.inv
           options:
             docstring_style: numpy
             docstring_section_style: list

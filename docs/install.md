@@ -1,10 +1,6 @@
-# raspa_ase
+# Installation
 
-An ASE-based calculator for the [RASPA](https://github.com/iRASPA/RASPA2) molecular simulation code.
-
-## Installation
-
-### RASPA
+## RASPA
 
 First, install RASPA based on the [official instructions](https://iraspa.org/raspa/).
 
@@ -24,7 +20,9 @@ make
 make install
 ```
 
-### `raspa_ase`
+For additional compilation details, refer to the RASPA manual.
+
+## `raspa_ase`
 
 To install `raspa_ase`, install the latest version of ASE followed by the latest version of `raspa_ase` as follows:
 

@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "raspa_ase"
-description="A Python package description goes here."
+description="An ASE calculator for the RASPA molecular simulation package."
 version = "0.0.1"
 readme = "README.md"
 license = { text = "BSD-3" }
-authors = [{ name = "YourName", email = "YourName@email.com" }]
-keywords = ["MyKeyword1", "MyKeyword2"]
+authors = [{ name = "Andrew S. Rosen", email = "asrosen@princeton.edu" }]
+keywords = ["RASPA", "ASE", "Molecular Simulations", "Monte Carlo"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
