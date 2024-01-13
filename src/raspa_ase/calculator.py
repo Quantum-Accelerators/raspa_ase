@@ -1,5 +1,5 @@
 """
-ASE calculator for RASPA_ase
+ASE calculator for RASPA
 """
 from __future__ import annotations
 
