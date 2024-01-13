@@ -202,6 +202,7 @@ class Raspa(GenericFileIOCalculator):
         directory: Path | str = ".",
         boxes: list[dict[str, Any]] | None = None,
         components: list[dict[str, Any]] | None = None,
+        parameters: dict[str, Any] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -300,7 +301,7 @@ class Raspa(GenericFileIOCalculator):
                     ReinsertionProbability 1.0
                     CreateNumberOfMolecules 25 50
                 ```
-        **kwargs
+        parameters
             Any RASPA parameters beyond the Box and Component parameters, formatted as a dictionary.
             Booleans will be converted to "Yes" or "No" automatically, and lists will be converted to
             space-separated strings. The RASPA parameters are case-insensitive.
@@ -320,6 +321,8 @@ class Raspa(GenericFileIOCalculator):
                 PrintEvery 100
                 Forcefield ExampleMoleculeForceField
                 ```
+        **kwargs
+            Any additional arguments to pass to the `GenericFileIO` calculator.
 
         Returns
         -------
@@ -342,4 +345,5 @@ class Raspa(GenericFileIOCalculator):
             profile=profile,
             directory=directory,
             parameters=parameters,
+            **kwargs,
         )

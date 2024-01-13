@@ -8,11 +8,31 @@ In this section, I provide the necessary inputs to run several of the examples i
 from ase import Atoms
 from raspa_ase import Raspa
 
-atoms = Atoms() # no framework
-boxes = [{"BoxLengths": [30, 30, 30], "ExternalTemperature": 300, "Movies": True, "WriteMoviesEvery": 100}]
-components = [{"MoleculeName": "methane", "MoleculeDefinition": "ExampleDefinitions", "TranslationProbability": 1.0, "CreateNumberOfMolecules": 100}]
-simulation_params = {"SimulationType": "MonteCarlo", "NumberOfCycles": 10000, "NumberOfInitializationCycles": 1000, "PrintEvery": 1000, "Forcefield": "ExampleMoleculeForceField"}
-calc = Raspa(boxes=boxes, components=components, **simulation_params)
+atoms = Atoms()  # no framework
+boxes = [
+    {
+        "BoxLengths": [30, 30, 30],
+        "ExternalTemperature": 300,
+        "Movies": True,
+        "WriteMoviesEvery": 100,
+    }
+]
+components = [
+    {
+        "MoleculeName": "methane",
+        "MoleculeDefinition": "ExampleDefinitions",
+        "TranslationProbability": 1.0,
+        "CreateNumberOfMolecules": 100,
+    }
+]
+parameters = {
+    "SimulationType": "MonteCarlo",
+    "NumberOfCycles": 10000,
+    "NumberOfInitializationCycles": 1000,
+    "PrintEvery": 1000,
+    "Forcefield": "ExampleMoleculeForceField",
+}
+calc = Raspa(boxes=boxes, components=components, parameters=parameters)
 
 atoms.calc = calc
 atoms.get_potential_energy()
