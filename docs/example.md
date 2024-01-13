@@ -2,6 +2,10 @@
 
 In this section, I provide the necessary inputs to run several of the examples in section 4.2 of the RASPA manual.
 
+!!! Tip
+
+    Pre-tabulated force fields and molecule definition files can be found in the `share` directory.
+
 ## Example 1: Monte Carlo of Methane in a Box
 
 ```python
