@@ -41,7 +41,54 @@ atoms.get_potential_energy()
 ## Example 2: Monte Carlo of CO2 in a Box and N2 in Another Box
 
 ```python
+from ase import Atoms
+from raspa_ase import Raspa
 
+atoms = Atoms()  # no framework
+boxes = [
+    {
+        "BoxLengths": [25, 25, 25],
+        "ExternalTemperature": 300.0,
+        "Movies": True,
+        "WriteMoviesEvery": 10,
+    },
+    {
+        "BoxLengths": [30, 30, 30],
+        "BoxAngles": [90, 120, 120],
+        "ExternalTemperature": 500,
+        "Movies": True,
+        "WriteMoviesEvery": 10,
+    },
+]
+components = [
+    {
+        "MoleculeName": "N2",
+        "MoleculeDefinition": "ExampleDefinitions",
+        "TranslationProbability": 1.0,
+        "RotationProbability": 1.0,
+        "ReinsertionProbability": 1.0,
+        "CreateNumberOfMolecules": [50, 25],
+    },
+    {
+        "MoleculeName": "CO2",
+        "MoleculeDefinition": "ExampleDefinitions",
+        "TranslationProbability": 1.0,
+        "RotationProbability": 1.0,
+        "ReinsertionProbability": 1.0,
+        "CreateNumberOfMolecules": [25, 50],
+    },
+]
+parameters = {
+    "SimulationType": "MonteCarlo",
+    "NumberOfCycles": 10000,
+    "NumberOfInitializationCycles": 1000,
+    "PrintEvery": 100,
+    "Forcefield": "ExampleMoleculeForceField",
+}
+calc = Raspa(boxes=boxes, components=components, parameters=parameters)
+
+atoms.calc = calc
+atoms.get_potential_energy()
 ```
 
 ## Example 7: Adsorption isotherm of methane in MFI

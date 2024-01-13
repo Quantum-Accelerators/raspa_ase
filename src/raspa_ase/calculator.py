@@ -3,7 +3,6 @@ ASE calculator for RASPA_ase
 """
 from __future__ import annotations
 
-import logging
 import os
 from pathlib import Path
 from subprocess import check_call
@@ -11,8 +10,9 @@ from typing import TYPE_CHECKING
 
 from ase.calculators.genericfileio import CalculatorTemplate, GenericFileIOCalculator
 
-from raspa_ase._io import write_frameworks, write_simulation_input
-from raspa_ase._params import get_framework_params, sanitize_parameters
+from raspa_ase.utils.dicts import merge_parameters, pop_parameter
+from raspa_ase.utils.io import write_frameworks, write_simulation_input
+from raspa_ase.utils.params import get_framework_params
 
 if TYPE_CHECKING:
     from typing import Any, TypedDict
@@ -20,10 +20,8 @@ if TYPE_CHECKING:
     from ase.atoms import Atoms
 
     class Results(TypedDict, total=False):
-        pass
+        energy: float  # eV
 
-
-logger = logging.getLogger(__name__)
 
 SIMULATION_INPUT = "simulation.input"
 LABEL = "raspa"
@@ -52,7 +50,7 @@ class RaspaProfile:
         raspa_dir = os.environ.get("RASPA_DIR")
         if not raspa_dir:
             raise OSError("RASPA_DIR environment variable not set")
-        self.argv = argv or [f"{raspa_dir}/bin/simulate", "{SIMULATION_INPUT}"]
+        self.argv = argv or [f"{raspa_dir}/bin/simulate", f"{SIMULATION_INPUT}"]
 
     def run(
         self,
@@ -149,9 +147,7 @@ class RaspaTemplate(CalculatorTemplate):
         None
         """
         frameworks = [atoms]
-
-        parameters = sanitize_parameters(parameters)
-        parameters |= get_framework_params(frameworks)
+        parameters = merge_parameters(parameters, get_framework_params(frameworks))
 
         write_simulation_input(parameters, directory / SIMULATION_INPUT)
         write_frameworks(frameworks, directory)
@@ -308,8 +304,8 @@ class Raspa(GenericFileIOCalculator):
 
             Example:
 
-                ```python
-                SimulationType="MonteCarlo", NumberOfCycles=10000, NumberOfInitializationCycles=1000, PrintEvery=100, ForceField="ExampleMoleculeForceField"
+                ```
+                parameters = {"SimulationType": "MonteCarlo", "NumberOfCycles": 10000, "NumberOfInitializationCycles": 1000, "PrintEvery": 100, "ForceField": "ExampleMoleculeForceField"}
                 ```
 
                 would be written out as the following from 4.2 Example 2 of the RASPA manual:
@@ -330,15 +326,17 @@ class Raspa(GenericFileIOCalculator):
         """
 
         profile = profile or RaspaProfile()
-        parameters = kwargs
         boxes = boxes or []
         components = components or []
+        parameters = parameters or {}
 
         for i, component in enumerate(components):
-            molecule_name = component.pop("MoleculeName")
-            parameters |= {f"Component {i} MoleculeName {molecule_name}": component}
+            molecule_name = pop_parameter(component, "MoleculeName")
+            parameters = merge_parameters(
+                parameters, {f"Component {i} MoleculeName {molecule_name}": component}
+            )
         for i, box in enumerate(boxes):
-            parameters |= {f"Box {i}": box}
+            parameters = merge_parameters(parameters, {f"Box {i}": box})
 
         super().__init__(
             template=RaspaTemplate(),

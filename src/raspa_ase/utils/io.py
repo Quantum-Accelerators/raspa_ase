@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 from ase.atoms import Atoms
 from pymatgen.io.ase import AseAtomsAdaptor
 
+from raspa_ase.utils.dicts import convert_booleans
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -31,6 +33,8 @@ def write_simulation_input(
     """
 
     simulation_input = ""
+    parameters = convert_booleans(parameters)
+
     for k, v in parameters.items():
         if isinstance(v, dict):
             simulation_input += f"{k}\n"
