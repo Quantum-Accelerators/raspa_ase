@@ -206,33 +206,31 @@ class Raspa(GenericFileIOCalculator):
         framework. All framework-related parameters should be set in the `Atoms.info`
         dictionary.
 
-        Example:
+        If you have an ASE `Atoms` object of the MFI zeolite ("atoms"), then:
 
-            If you have an ASE `Atoms` object of the MFI zeolite ("atoms"), then:
+        ```python
+        atoms.info = {"HeliumVoidFraction": 0.29}
+        ```
 
-            ```python
-            atoms.info = {"HeliumVoidFraction": 0.29}
-            ```
+        would be written out as the following:
 
-            would be written out as the following:
+        ```
+        Framework 0
+            FrameworkName framework0
+            UnitCells 12 12 12
+            HeliumVoidFraction 0.29
+        ```
 
-            ```
-            Framework 0
-                FrameworkName framework0
-                UnitCells 12 12 12
-                HeliumVoidFraction 0.29
-            ```
+        The `FrameworkName` is automaticallly set by the calculator.
+        The UnitCells parameter will be automatically set to prevent spurious
+        interactions between periodic images based on the cutoff,
+        if the parameter is not already supplied by the user.
 
-            The `FrameworkName` is automaticallly set by the calculator.
-            The UnitCells parameter will be automatically set to prevent spurious
-            interactions between periodic images based on the cutoff,
-            if the parameter is not already supplied by the user.
+        To use partial atomic charges on the framework, set the `Atoms.set_initial_charges`
+        method on the `Atoms` object. The charges will be written out to the CIF file
+        and `UseChargesFromCIFFile` will be set to `yes` in the `simulation.input` file.
 
-            To use partial atomic charges on the framework, set the `Atoms.set_initial_charges`
-            method on the `Atoms` object. The charges will be written out to the CIF file
-            and `UseChargesFromCIFFile` will be set to `yes` in the `simulation.input` file.
-
-            To use no framework, have the `Atoms` object be empty, i.e. `Atoms()`.
+        To use no framework, have the `Atoms` object be empty, i.e. `Atoms()`.
 
         Parameters
         ----------
