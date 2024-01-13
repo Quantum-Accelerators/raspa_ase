@@ -56,7 +56,7 @@ def test_template_write_input(monkeypatch, tmp_path):
 
 def test_template_read_results():
     template = RaspaTemplate()
-    assert template.read_results(".") == {}
+    assert template.read_results(".") == {"energy": None}
 
 
 def test_raspa_blank():
@@ -101,10 +101,7 @@ def test_raspa_components():
 def test_raspa_functional1(tmp_path):
     atoms = Atoms()
     atoms.calc = Raspa(directory=tmp_path)
-    try:
-        atoms.get_potential_energy()
-    except Exception:
-        pass
+    atoms.get_potential_energy()
     assert Path(tmp_path / "simulation.input").exists()
     assert Path(tmp_path / "simulation.input").read_text() == ""
 
@@ -124,10 +121,7 @@ def test_raspa_functional2(tmp_path):
             },
         ],
     )
-    try:
-        assert atoms.get_potential_energy()
-    except Exception:
-        pass
+    atoms.get_potential_energy()
     assert Path(tmp_path, "simulation.input").exists()
     assert (
         Path(tmp_path / "simulation.input").read_text()

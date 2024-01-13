@@ -166,7 +166,7 @@ class RaspaTemplate(CalculatorTemplate):
         Results
             The RASPA results, formatted as a dictionary.
         """
-        return {}
+        return {"energy": None}
 
     def load_profile(self, cfg, **kwargs) -> RaspaProfile:
         """
