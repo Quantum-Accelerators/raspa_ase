@@ -4,7 +4,7 @@ In this section, I provide the necessary inputs to run several of the examples i
 
 !!! Tip
 
-    Pre-tabulated force fields and molecule definition files can be found in the `share` directory.
+    Pre-tabulated force fields and molecule definition files can be found in the [`share`](https://github.com/Quantum-Accelerators/raspa_ase/tree/main/share) directory.
 
 ## Example 1: Monte Carlo of Methane in a Box
 
