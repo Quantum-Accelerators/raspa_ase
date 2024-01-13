@@ -1,6 +1,6 @@
 # Examples
 
-In this section, I provide the necessary inputs to run several of the examples in section 4.2 of the RASPA manual.
+In this section, I provide the necessary inputs to run several of the examples in [section 4.2 of the RASPA manual](https://iraspa.org/download/raspa-manual-23-may-2021/).
 
 !!! Tip
 
