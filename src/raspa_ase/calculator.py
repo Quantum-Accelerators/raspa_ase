@@ -114,8 +114,8 @@ class RaspaTemplate(CalculatorTemplate):
         """
         profile.run(directory, self.output_file)
 
+    @staticmethod
     def write_input(
-        self,
         directory: Path | str,
         atoms: Atoms,
         parameters: dict[str, Any],
@@ -148,7 +148,8 @@ class RaspaTemplate(CalculatorTemplate):
         write_simulation_input(parameters, directory / SIMULATION_INPUT)
         write_frameworks(frameworks, directory)
 
-    def read_results(self, directory: Path | str) -> Results:
+    @staticmethod
+    def read_results(directory: Path | str) -> Results:
         """
         Read the results of a RASPA calculation.
 
