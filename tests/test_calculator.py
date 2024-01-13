@@ -13,14 +13,12 @@ def test_profile_bad(monkeypatch):
         RaspaProfile()
 
 
-def test_profile(monkeypatch):
-    monkeypatch.setenv("RASPA_DIR", ".")
+def test_profile():
     profile = RaspaProfile()
     assert profile.argv == ["./bin/simulate", "simulation.input"]
 
 
-def test_profile2(monkeypatch):
-    monkeypatch.setenv("RASPA_DIR", ".")
+def test_profile2():
     profile = RaspaProfile(argv=["test"])
     assert profile.argv == ["test"]
 
