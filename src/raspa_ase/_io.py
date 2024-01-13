@@ -4,12 +4,11 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from ase.atoms import Atoms
 from pymatgen.io.ase import AseAtomsAdaptor
 
 if TYPE_CHECKING:
     from typing import Any
-
-    from ase.atoms import Atoms
 
 
 def write_simulation_input(
@@ -62,6 +61,8 @@ def write_frameworks(frameworks: list[Atoms], directory: str | Path) -> None:
     None
     """
     for i, framework in enumerate(frameworks):
+        if framework == Atoms():
+            continue
         name = f"framework{i}"
 
         structure = AseAtomsAdaptor.get_structure(framework)

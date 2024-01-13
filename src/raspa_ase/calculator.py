@@ -238,6 +238,8 @@ class Raspa(GenericFileIOCalculator):
             method on the `Atoms` object. The charges will be written out to the CIF file
             and `UseChargesFromCIFFile` will be set to `yes` in the `simulation.input` file.
 
+            To use no framework, have the `Atoms` object be empty, i.e. `Atoms()`.
+
         Parameters
         ----------
         profile

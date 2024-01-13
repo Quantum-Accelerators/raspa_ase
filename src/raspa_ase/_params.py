@@ -3,11 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from ase.atoms import Atoms
 
 if TYPE_CHECKING:
     from typing import Any
-
-    from ase.atoms import Atoms
 
 
 def get_framework_params(frameworks: list[Atoms]) -> dict[str, Any]:
@@ -28,6 +27,9 @@ def get_framework_params(frameworks: list[Atoms]) -> dict[str, Any]:
     # with _atom_site_charge and in RASPA set UseChargesFromCIFFile yes
     parameters = {}
     for i, framework in enumerate(frameworks):
+        if framework == Atoms():
+            continue
+
         name = f"framework{i}"
 
         n_cells = get_suggested_cells(framework, parameters.get("cutoff", 12.0))
