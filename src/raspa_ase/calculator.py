@@ -84,10 +84,6 @@ class RaspaTemplate(CalculatorTemplate):
         """
         Initialize the RASPA template.
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
         None

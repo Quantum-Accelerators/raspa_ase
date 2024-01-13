@@ -1,4 +1,4 @@
-# Example
+# Examples
 
 In this section, I provide the necessary inputs to run several of the examples in section 4.2 of the RASPA manual.
 

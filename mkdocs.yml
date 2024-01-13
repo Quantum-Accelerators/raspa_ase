@@ -4,12 +4,13 @@ site_description: >-
   An ASE calculator for RASPA.
 nav:
   - Home: index.md
-      - installation/install.md
+  - install.md
+  - example.md
   - Code Documentation: reference/ # keep me!
   - About:
-      - example_docs/about/changelog.md
-      - example_docs/about/conduct.md
-      - example_docs/about/license.md
+      - about/changelog.md
+      - about/conduct.md
+      - about/license.md
 
 repo_url: https://github.com/Quantum-Accelerators/raspa_ase/
 edit_uri: blob/main/docs/
