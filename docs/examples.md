@@ -17,11 +17,11 @@ boxes = [  #  (2)!
     {
         "BoxLengths": [30, 30, 30],
         "ExternalTemperature": 300,
-        "Movies": True,
+        "Movies": True,  # (3)!
         "WriteMoviesEvery": 100,
     }
 ]
-components = [  # (3)!
+components = [  # (4)!
     {
         "MoleculeName": "methane",
         "MoleculeDefinition": "ExampleDefinitions",
@@ -29,7 +29,7 @@ components = [  # (3)!
         "CreateNumberOfMolecules": 100,
     }
 ]
-parameters = {  # (4)!
+parameters = {  # (5)!
     "SimulationType": "MonteCarlo",
     "NumberOfCycles": 10000,
     "NumberOfInitializationCycles": 1000,
@@ -46,9 +46,11 @@ atoms.get_potential_energy()
 
 2. You do not need to specify the box number. It will be determined automatically based on the order in which the components are listed. We define the box parameters as a dictionary to be provided to the `boxes` keyword argument.
 
-3. You do not need to specify the component number. It will be determined automatically based on the order in which the components are listed. We define the component parameters as a dictionary to be provided to the `components` keyword argument.
+3. `True` and `False` will be automatically translated to "Yes" and "No", respectively.
 
-4. The remaining force field parameters (i.e. all those beyond the box, component, and framework parameters) are to be specified as a dictionary to be provided to the `parameters` keyword argument.
+4. You do not need to specify the component number. It will be determined automatically based on the order in which the components are listed. We define the component parameters as a dictionary to be provided to the `components` keyword argument.
+
+5. The remaining force field parameters (i.e. all those beyond the box, component, and framework parameters) are to be specified as a dictionary to be provided to the `parameters` keyword argument.
 
 ## Example 2: Monte Carlo of CO2 in a Box and N2 in Another Box
 
@@ -111,7 +113,7 @@ from raspa_ase import Raspa
 
 atoms = read("MFI_SI.cif")  # (1)!
 atoms.info = {  # (2)!
-    "UnitCells": [2, 2, 2],  # (3)!
+    "UnitCells": [2, 2, 2],
     "HeliumVoidFraction": 0.29,
     "ExternalTemperature": 300.0,
     "ExternalPressure": [1e4, 1e5],
@@ -153,8 +155,6 @@ atoms.get_potential_energy()
 
 2. The framework parameters are to be specified as `info` attributes of the `Atoms` object. You do not need to include the framework number or framework name. These will be included automatically.
 
-3. If you do not specify the "UnitCells" parameter, the calculator will automatically determine an appropriate value based on the size of the unit cell and the chosen cutoff (taken as 12.0 Angstroms if not specified) to account for the minimum image convention.
-
 ## Example 8: Adsorption isotherm of CO2 in Cu-BTC
 
 !!! Note
@@ -166,12 +166,12 @@ from ase.io import read
 from raspa_ase import Raspa
 
 atoms = read("Cu-BTC.cif")  # (1)!
-atoms.info = {
+atoms.info = {  # (2)!
     "HeliumVoidFraction": 0.29,
     "ExternalTemperature": 323.0,
     "ExternalPressure": 100000.0,
 }
-atoms.set_initial_charges([1.0])  # (2)!
+atoms.set_initial_charges([1.0])  # (3)!
 
 components = [
     {
@@ -201,4 +201,6 @@ atoms.get_potential_energy()
 
 1. This file is provided in `raspa_ase/docs/files/Cu-BTC.cif` for the sake of this tutorial. The `Atoms` object represents the framework to be studied and will be written out to the current working directory to be used by RASPA.
 
-2. This will set `_atom_site_charge` label in the CIF file and will automatically enable "UseChargesFromCIFFile" in the `parameters` block.
+2. If you do not specify the "UnitCells" parameter, the calculator will automatically determine an appropriate value based on the size of the unit cell and the chosen cutoff (taken as 12.0 Angstroms if not specified) to account for the minimum image convention.
+
+3. This will set `_atom_site_charge` label in the CIF file and will automatically enable "UseChargesFromCIFFile" in the `parameters` block.
