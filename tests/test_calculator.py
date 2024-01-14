@@ -213,7 +213,9 @@ def test_example(tmp_path):
     atoms.get_potential_energy()
     assert "System_0" in calc.results
     assert "output_Box_1.1.1_300.000000_0.data" in calc.results["System_0"]
-    assert calc.results["System_0"]["output_Box_1"]["Simulation"]["Dimensions"] == [3.0]
+    assert calc.results["System_0"]["output_Box_1.1.1_300.000000_0.data"]["Simulation"][
+        "Dimensions"
+    ] == [3.0]
 
 
 @pytest.mark.skipif("RASPA_DIR" not in os.environ, reason="This test requires RASPA")
@@ -267,7 +269,7 @@ def test_example2(tmp_path):
     atoms.get_potential_energy()
     assert "System_0" in calc.results
     assert "System_1" in calc.results
-    assert "output_Box_1.1.1_500.000000_0.data" in calc.results["System_0"]
+    assert "output_Box_1.1.1_300.000000_0.data" in calc.results["System_0"]
     assert "output_Box_1.1.1_500.000000_0.data" in calc.results["System_1"]
 
 

@@ -46,7 +46,7 @@ jobs:
         run: echo "RASPA_DIR=/usr/share/miniconda" >> "$GITHUB_ENV"
 
       - name: Run tests with pytest
-        run: pytest --noconftest --cov=raspa_ase --cov-report=xml
+        run: pytest --cov=raspa_ase --cov-report=xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
