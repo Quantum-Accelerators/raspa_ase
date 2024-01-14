@@ -129,7 +129,7 @@ class RaspaTemplate(CalculatorTemplate):
             directory,
             self.inputname,
             directory / self.outputname,
-            errorfile=self.errorfile,
+            errorfile=directory / self.errorfile,
         )
 
     @staticmethod
