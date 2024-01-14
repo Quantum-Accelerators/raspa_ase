@@ -33,7 +33,7 @@ atoms.info["HeliumVoidFraction"] = 0.149
 
 would be equivalent to
 
-```python
+```
 Framework 0
     FrameworkName framework0
     HeliumVoidFraction 0.149
@@ -58,7 +58,10 @@ The optional `boxes` keyword argument, of type `list[dict]`, is a list where eac
 For instance:
 
 ```python
-boxes = [{"BoxLengths": [30, 30, 30]}, {"BoxLengths": [40, 40, 40], "BoxAngles": [90, 120, 120]}]
+boxes = [
+    {"BoxLengths": [30, 30, 30]},
+    {"BoxLengths": [40, 40, 40], "BoxAngles": [90, 120, 120]},
+]
 Raspa(boxes=boxes)
 ```
 
