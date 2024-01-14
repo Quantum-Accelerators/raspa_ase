@@ -55,9 +55,30 @@ class RaspaProfile(BaseProfile):
         self.binary = binary
 
     def get_calculator_command(self, inputfile: str = SIMULATION_INPUT) -> list[str]:
+        """
+        Construct the command for the calculator.
+
+        Parameters
+        ----------
+        inputfile
+            The name of the input file to use.
+
+        Returns
+        -------
+        list[str]
+            The command to run the calculator.
+        """
         return [self.binary, f"{inputfile}"]
 
-    def version(self):
+    def version(self) -> str:
+        """
+        Get the RASPA version number.
+
+        Returns
+        ------
+        str
+            The RASPA version.
+        """
         raise NotImplementedError
 
 
