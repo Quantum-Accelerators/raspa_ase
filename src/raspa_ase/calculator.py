@@ -51,7 +51,7 @@ class RaspaProfile:
     def run(
         self,
         directory: Path | str,
-        output_filename: Path | str,
+        output_filename: str,
     ) -> None:
         """
         Run the RASPA calculation.
@@ -76,9 +76,15 @@ class RaspaTemplate(CalculatorTemplate):
     RASPA template, used to define how to read and write RASPA files.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, frameworks: list[Atoms] | None = None) -> None:
         """
         Initialize the RASPA template.
+
+        Parameters
+        ----------
+        frameworks
+            The frameworks to use, to be used in place of the `Atoms` object
+            the calculator is applied to.
 
         Returns
         -------
@@ -92,6 +98,7 @@ class RaspaTemplate(CalculatorTemplate):
 
         self.input_file = SIMULATION_INPUT
         self.output_file = f"{label}.out"
+        self.frameworks = frameworks
 
     def execute(self, directory: Path | str, profile: RaspaProfile) -> None:
         """
@@ -110,8 +117,8 @@ class RaspaTemplate(CalculatorTemplate):
         """
         profile.run(directory, self.output_file)
 
-    @staticmethod
     def write_input(
+        self,
         directory: Path | str,
         atoms: Atoms,
         parameters: dict[str, Any],
@@ -138,7 +145,7 @@ class RaspaTemplate(CalculatorTemplate):
         -------
         None
         """
-        frameworks = [atoms]
+        frameworks = self.frameworks if self.frameworks else [atoms]
         parameters = merge_parameters(parameters, get_framework_params([atoms]))
 
         write_simulation_input(parameters, directory / SIMULATION_INPUT)
@@ -372,7 +379,7 @@ class Raspa(GenericFileIOCalculator):
             parameters = merge_parameters(parameters, {f"Box {i}": box})
 
         super().__init__(
-            template=RaspaTemplate(),
+            template=RaspaTemplate(frameworks=multiple_frameworks),
             profile=profile,
             directory=directory,
             parameters=parameters,
