@@ -5,34 +5,33 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from subprocess import check_call
 from typing import TYPE_CHECKING
 
-from ase.calculators.genericfileio import CalculatorTemplate, GenericFileIOCalculator
+from ase.calculators.genericfileio import (
+    BaseProfile,
+    CalculatorTemplate,
+    GenericFileIOCalculator,
+)
 
 from raspa_ase.utils.dicts import merge_parameters, pop_parameter
-from raspa_ase.utils.io import write_frameworks, write_simulation_input
+from raspa_ase.utils.io import parse_output, write_frameworks, write_simulation_input
 from raspa_ase.utils.params import get_framework_params
 
 if TYPE_CHECKING:
-    from typing import Any, TypedDict
+    from typing import Any
 
     from ase.atoms import Atoms
-
-    class Results(TypedDict, total=False):
-        energy: float  # eV
-
 
 SIMULATION_INPUT = "simulation.input"
 LABEL = "raspa"
 
 
-class RaspaProfile:
+class RaspaProfile(BaseProfile):
     """
     RASPA profile, which defines the command that will be executed and where.
     """
 
-    def __init__(self, argv: list[str] | None = None) -> None:
+    def __init__(self, binary: Path | str | None = None, **kwargs) -> None:
         """
         Initialize the RASPA profile. $RASPA_DIR must be set in the environment.
 
@@ -47,32 +46,40 @@ class RaspaProfile:
         -------
         None
         """
-        raspa_dir = os.environ.get("RASPA_DIR")
-        if not raspa_dir:
-            raise OSError("RASPA_DIR environment variable not set")
-        self.argv = argv or [f"{raspa_dir}/bin/simulate", f"{SIMULATION_INPUT}"]
+        super().__init__(**kwargs)
+        if not binary:
+            raspa_dir = os.environ.get("RASPA_DIR")
+            if not raspa_dir:
+                raise OSError("RASPA_DIR environment variable not set")
+            binary = f"{raspa_dir}/bin/simulate"
+        self.binary = binary
 
-    def run(
-        self,
-        directory: Path | str,
-        output_filename: str,
-    ) -> None:
+    def get_calculator_command(self, inputfile: str = SIMULATION_INPUT) -> list[str]:
         """
-        Run the RASPA calculation.
+        Construct the command for the calculator.
 
         Parameters
         ----------
-        directory
-            The directory where the calculation will be run.
-        output_filename
-            The name of the logfile to write to in the directory.
+        inputfile
+            The name of the input file to use.
 
         Returns
         -------
-        None
+        list[str]
+            The command to run the calculator.
         """
-        with Path(output_filename).open("w") as fd:
-            check_call(self.argv, stdout=fd, cwd=directory)
+        return [self.binary, f"{inputfile}"]
+
+    def version(self) -> str:
+        """
+        Get the RASPA version number.
+
+        Returns
+        ------
+        str
+            The RASPA version.
+        """
+        raise NotImplementedError
 
 
 class RaspaTemplate(CalculatorTemplate):
@@ -94,39 +101,22 @@ class RaspaTemplate(CalculatorTemplate):
         -------
         None
         """
-        label = "raspa"
         super().__init__(
-            name=label,
+            name="raspa",
             implemented_properties=["energy"],
         )
 
-        self.input_file = SIMULATION_INPUT
-        self.output_file = f"{label}.out"
+        self.inputname = SIMULATION_INPUT
+        self.outputname = "raspa.stdout"
+        self.errorfile = "raspa.stderr"
         self.frameworks = frameworks
-
-    def execute(self, directory: Path | str, profile: RaspaProfile) -> None:
-        """
-        Run the RASPA executable.
-
-        Parameters
-        ----------
-        directory
-            The path to the directory to run the RASPA executable in.
-        profile
-            The RASPA profile to use.
-
-        Returns
-        -------
-        None
-        """
-        profile.run(directory, self.output_file)
 
     def write_input(
         self,
+        profile: RaspaProfile,  # skipcq: PYL-W0613
         directory: Path | str,
         atoms: Atoms,
         parameters: dict[str, Any],
-        profile: RaspaProfile,  # skipcq: PYL-W0613
         properties: Any,  # skipcq: PYL-W0613
     ) -> None:
         """
@@ -152,11 +142,19 @@ class RaspaTemplate(CalculatorTemplate):
         frameworks = self.frameworks if self.frameworks else [atoms]
         parameters = merge_parameters(parameters, get_framework_params([atoms]))
 
-        write_simulation_input(parameters, directory / SIMULATION_INPUT)
+        write_simulation_input(parameters, directory / self.inputname)
         write_frameworks(frameworks, directory)
 
+    def execute(self, directory: Path | str, profile: RaspaProfile) -> None:
+        profile.run(
+            directory,
+            self.inputname,
+            directory / self.outputname,
+            errorfile=directory / self.errorfile,
+        )
+
     @staticmethod
-    def read_results(directory: Path | str) -> Results:
+    def read_results(directory: Path | str) -> dict[str, Any]:
         """
         Read the results of a RASPA calculation.
 
@@ -170,7 +168,16 @@ class RaspaTemplate(CalculatorTemplate):
         Results
             The RASPA results, formatted as a dictionary.
         """
-        return {"energy": None}
+        output_path = Path(directory) / "Output"
+        systems = Path(output_path).glob("System_*")
+        results = {"energy": None}
+        for system in systems:
+            data_files = Path(system).glob("*.data")
+            results[system.name] = {}
+            for data_file in data_files:
+                output = parse_output(data_file)
+                results[system.name][data_file.name] = output
+        return results
 
     def load_profile(self, cfg, **kwargs) -> RaspaProfile:
         """
