@@ -40,6 +40,8 @@ def test_template():
 
 def test_template_execute(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
+    with Path(tmp_path / "simulation.input").open(mode="w") as fd:
+        fd.write("")
     template = RaspaTemplate()
     template.execute(tmp_path, RaspaProfile())
 
