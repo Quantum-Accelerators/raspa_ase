@@ -114,20 +114,20 @@ Component 1 MoleculeName N2
 
     You never need to specify the component number. This is determined based on the index of the component in the list. The "MoleculeName" will also be formatted automatically for you.
 
-## Keywords
+## Remaining Parameters
 
-The optional `keywords` keyword argument, of type `dict`, is a dictionary of all other parameters to be passed to RASPA.
+The optional `parameters` keyword argument, of type `dict`, is a dictionary of all other parameters to be passed to RASPA.
 
 For instance:
 
 ```python
-keywords = {
+parameters = {
     "SimulationType": "MonteCarlo",
     "NumberOfCycles": 10000,
     "NumberOfInitializationCycles": 1000,
     "Movies": True,
 }
-calc = Raspa(keywords=keywords)
+calc = Raspa(parameters=parameters)
 ```
 
 is equivalent to
