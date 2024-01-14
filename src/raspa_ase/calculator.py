@@ -302,7 +302,7 @@ class Raspa(GenericFileIOCalculator):
 
             Example:
 
-            ```
+            ```python
             parameters = {"SimulationType": "MonteCarlo", "NumberOfCycles": 10000, "NumberOfInitializationCycles": 1000, "PrintEvery": 100, "ForceField": "ExampleMoleculeForceField"}
             Raspa(parameters=parameters)
             ```
