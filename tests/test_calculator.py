@@ -128,3 +128,17 @@ def test_raspa_functional2(tmp_path):
         Path(tmp_path / "simulation.input").read_text()
         == "CutOff 12.8\nComponent 0 MoleculeName N2\n    MoleculeDefinition ExampleDefinition\nComponent 1 MoleculeName CO2\n    MoleculeDefinition ExampleDefinition\n    TranslationProbability 1.0\nBox 0\n    BoxLengths 1 2 3\nBox 1\n    BoxLengths 4 5 6\nFramework 0\n    FrameworkName framework0\n    UnitCells 12 12 12\n    UseChargesFromCIFFile Yes\n"
     )
+
+
+def test_multi_frameworks(tmp_path):
+    atoms1 = bulk("Cu")
+    atoms1.info = {"HeliumVoidFraction": 0.75}
+    atoms2 = bulk("Fe")
+    atoms = Atoms()
+    atoms.calc = Raspa(directory=tmp_path, multiple_frameworks=[atoms1, atoms2])
+    atoms.get_potential_energy()
+    assert Path(tmp_path, "simulation.input").exists()
+    assert (
+        Path(tmp_path / "simulation.input").read_text()
+        == "Framework 0\n    FrameworkName framework0\n    UnitCells 12 12 12\n    HeliumVoidFraction 0.75\nFramework 1\n    FrameworkName framework1\n    UnitCells 12 12 12\n"
+    )
