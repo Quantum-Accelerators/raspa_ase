@@ -8,6 +8,8 @@ from ase.io import read
 
 from raspa_ase.calculator import Raspa, RaspaProfile, RaspaTemplate
 
+DATA_DIR = Path(__file__).parent / "data"
+
 
 def test_profile_bad(monkeypatch):
     monkeypatch.delenv("RASPA_DIR", "/tmp")
@@ -175,3 +177,142 @@ def test_multi_frameworks(tmp_path):
     assert Path(tmp_path / "framework1.cif").exists()
     assert read(tmp_path / "framework0.cif")[0].symbol == "Cu"
     assert read(tmp_path / "framework1.cif")[0].symbol == "Fe"
+
+
+@pytest.mark.skipif("RASPA_DIR" not in os.environ, reason="This test requires RASPA")
+def test_example(tmp_path):
+    atoms = Atoms()
+    boxes = [
+        {
+            "BoxLengths": [30, 30, 30],
+            "ExternalTemperature": 300,
+            "Movies": True,
+            "WriteMoviesEvery": 100,
+        }
+    ]
+    components = [
+        {
+            "MoleculeName": "methane",
+            "MoleculeDefinition": "ExampleDefinitions",
+            "TranslationProbability": 1.0,
+            "CreateNumberOfMolecules": 100,
+        }
+    ]
+    parameters = {
+        "SimulationType": "MonteCarlo",
+        "NumberOfCycles": 100,
+        "NumberOfInitializationCycles": 10,
+        "PrintEvery": 10,
+        "Forcefield": "ExampleMoleculeForceField",
+    }
+    calc = Raspa(
+        directory=tmp_path, boxes=boxes, components=components, parameters=parameters
+    )
+
+    atoms.calc = calc
+    atoms.get_potential_energy()
+    assert "System_0" in calc.results
+    assert "output_Box_1.1.1_300.000000_0.data" in calc.results["System_0"]
+    assert calc.results["System_0"]["output_Box_1.1.1_300.000000_0.data"]["Simulation"][
+        "Dimensions"
+    ] == [3.0]
+
+
+@pytest.mark.skipif("RASPA_DIR" not in os.environ, reason="This test requires RASPA")
+def test_example2(tmp_path):
+    atoms = Atoms()
+    boxes = [
+        {
+            "BoxLengths": [25, 25, 25],
+            "ExternalTemperature": 300.0,
+            "Movies": True,
+            "WriteMoviesEvery": 10,
+        },
+        {
+            "BoxLengths": [30, 30, 30],
+            "BoxAngles": [90, 120, 120],
+            "ExternalTemperature": 500,
+            "Movies": True,
+            "WriteMoviesEvery": 10,
+        },
+    ]
+    components = [
+        {
+            "MoleculeName": "N2",
+            "MoleculeDefinition": "ExampleDefinitions",
+            "TranslationProbability": 1.0,
+            "RotationProbability": 1.0,
+            "ReinsertionProbability": 1.0,
+            "CreateNumberOfMolecules": [50, 25],
+        },
+        {
+            "MoleculeName": "CO2",
+            "MoleculeDefinition": "ExampleDefinitions",
+            "TranslationProbability": 1.0,
+            "RotationProbability": 1.0,
+            "ReinsertionProbability": 1.0,
+            "CreateNumberOfMolecules": [25, 50],
+        },
+    ]
+    parameters = {
+        "SimulationType": "MonteCarlo",
+        "NumberOfCycles": 20,
+        "NumberOfInitializationCycles": 10,
+        "PrintEvery": 10,
+        "Forcefield": "ExampleMoleculeForceField",
+    }
+    calc = Raspa(
+        directory=tmp_path, boxes=boxes, components=components, parameters=parameters
+    )
+
+    atoms.calc = calc
+    atoms.get_potential_energy()
+    assert "System_0" in calc.results
+    assert "System_1" in calc.results
+    assert "output_Box_1.1.1_300.000000_0.data" in calc.results["System_0"]
+    assert "output_Box_1.1.1_500.000000_0.data" in calc.results["System_1"]
+
+
+@pytest.mark.skipif("RASPA_DIR" not in os.environ, reason="This test requires RASPA")
+def test_example3(tmp_path):
+    atoms = read(Path(DATA_DIR / "MFI_SI.cif"))
+    atoms.info = {
+        "UnitCells": [2, 2, 2],
+        "HeliumVoidFraction": 0.29,
+        "ExternalTemperature": 300.0,
+        "ExternalPressure": [1e4, 1e5],
+    }
+    components = [
+        {
+            "MoleculeName": "methane",
+            "MoleculeDefinition": "ExampleDefinitions",
+            "TranslationProbability": 0.5,
+            "ReinsertionProbability": 0.5,
+            "SwapProbability": 1.0,
+            "CreateNumberOfMolecules": 0,
+        }
+    ]
+    parameters = {
+        "SimulationType": "MonteCarlo",
+        "NumberOfCycles": 25,
+        "NumberOfInitializationCycles": 2,
+        "PrintEvery": 5,
+        "Forcefield": "ExampleZeolitesForceField",
+        "RemoveAtomNumberCodeFromLabel": True,
+        "ComputeNumberOfMoleculesHistogram": True,
+        "WriteNumberOfMoleculesHistogramEvery": 5,
+        "NumberOfMoleculesHistogramSize": 5,
+        "NumberOfMoleculesRange": 5,
+        "ComputeEnergyHistogram": True,
+        "WriteEnergyHistogramEvery": 5,
+        "EnergyHistogramSize": 5,
+        "EnergyHistogramLowerLimit": -110000,
+        "EnergyHistogramUpperLimit": -20000,
+    }
+    calc = Raspa(directory=tmp_path, components=components, parameters=parameters)
+
+    atoms.calc = calc
+    atoms.get_potential_energy()
+    assert "System_0" in calc.results
+    assert "output_framework0_2.2.2_300.000000_10000.data" in calc.results["System_0"]
+    assert "output_framework0_2.2.2_300.000000_100000.data" in calc.results["System_0"]

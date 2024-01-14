@@ -40,6 +40,7 @@ calc = Raspa(boxes=boxes, components=components, parameters=parameters)
 
 atoms.calc = calc
 atoms.get_potential_energy()
+print(calc.results)
 ```
 
 1. Use an empty `Atoms` object to create a system without a framework.
@@ -103,6 +104,7 @@ calc = Raspa(boxes=boxes, components=components, parameters=parameters)
 
 atoms.calc = calc
 atoms.get_potential_energy()
+print(calc.results)
 ```
 
 ## Example 7: Adsorption isotherm of methane in MFI
@@ -149,6 +151,7 @@ calc = Raspa(components=components, parameters=parameters)
 
 atoms.calc = calc
 atoms.get_potential_energy()
+print(calc.results)
 ```
 
 1. This file is provided in [`raspa_ase/docs/files/MFI_SI.cif`](https://github.com/Quantum-Accelerators/raspa_ase/blob/main/docs/files/MFI_SI.cif) for the sake of this tutorial. The `Atoms` object represents the framework to be studied and will be written out to the current working directory to be used by RASPA.

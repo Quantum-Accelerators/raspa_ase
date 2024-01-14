@@ -11,17 +11,13 @@ from typing import TYPE_CHECKING
 from ase.calculators.genericfileio import CalculatorTemplate, GenericFileIOCalculator
 
 from raspa_ase.utils.dicts import merge_parameters, pop_parameter
-from raspa_ase.utils.io import write_frameworks, write_simulation_input
+from raspa_ase.utils.io import parse_output, write_frameworks, write_simulation_input
 from raspa_ase.utils.params import get_framework_params
 
 if TYPE_CHECKING:
-    from typing import Any, TypedDict
+    from typing import Any
 
     from ase.atoms import Atoms
-
-    class Results(TypedDict, total=False):
-        energy: float  # eV
-
 
 SIMULATION_INPUT = "simulation.input"
 LABEL = "raspa"
@@ -156,7 +152,7 @@ class RaspaTemplate(CalculatorTemplate):
         write_frameworks(frameworks, directory)
 
     @staticmethod
-    def read_results(directory: Path | str) -> Results:
+    def read_results(directory: Path | str) -> dict[str, Any]:
         """
         Read the results of a RASPA calculation.
 
@@ -170,7 +166,16 @@ class RaspaTemplate(CalculatorTemplate):
         Results
             The RASPA results, formatted as a dictionary.
         """
-        return {"energy": None}
+        output_path = Path(directory) / "Output"
+        systems = Path(output_path).glob("System_*")
+        results = {"energy": None}
+        for system in systems:
+            data_files = Path(system).glob("*.data")
+            results[system.name] = {}
+            for data_file in data_files:
+                output = parse_output(data_file)
+                results[system.name][data_file.name] = output
+        return results
 
     def load_profile(self, cfg, **kwargs) -> RaspaProfile:
         """
