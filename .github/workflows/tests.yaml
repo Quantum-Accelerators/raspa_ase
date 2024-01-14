@@ -39,6 +39,9 @@ jobs:
           pip install -r tests/requirements.txt
           pip install .[dev]
 
+      - name: Install conda packages
+        run: conda install -c conda-forge raspa2
+
       - name: Run tests with pytest
         run: pytest --cov=raspa_ase --cov-report=xml
 
