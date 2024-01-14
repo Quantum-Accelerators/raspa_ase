@@ -37,9 +37,8 @@ class RaspaProfile(BaseProfile):
 
         Parameters
         ----------
-        argv
-            The command line arguments to the RASPA executable.
-            This defaults to doing `${RASPA_DIR}/bin/simulate simulation.input`
+        binary
+            The binary to run RASPA. This defaults to doing `${RASPA_DIR}/bin/simulate`
             and typically does not need to be changed.
 
         Returns
