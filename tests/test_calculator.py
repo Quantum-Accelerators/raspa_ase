@@ -19,26 +19,31 @@ def test_profile_bad(monkeypatch):
 
 def test_profile():
     profile = RaspaProfile()
-    assert profile.argv == [
+    assert profile.binary == f"{os.getenv('RASPA_DIR')}/bin/simulate"
+
+    assert profile.get_calculator_command() == [
         f"{os.getenv('RASPA_DIR')}/bin/simulate",
         "simulation.input",
     ]
 
-
-def test_profile2():
-    profile = RaspaProfile(argv=["test"])
-    assert profile.argv == ["test"]
+    with pytest.raises(NotImplementedError):
+        profile.version()
 
 
-def test_run(monkeypatch, tmp_path):
-    monkeypatch.chdir(tmp_path)
-    RaspaProfile().run(tmp_path, tmp_path / "simulation.input")
+def test_profil2e():
+    profile = RaspaProfile(binary="my/path")
+    assert profile.binary == "my/path"
+
+    assert profile.get_calculator_command() == [
+        "my/path",
+        "simulation.input",
+    ]
 
 
 def test_template():
     template = RaspaTemplate()
-    assert template.input_file == "simulation.input"
-    assert template.output_file == "raspa.out"
+    assert template.inputname == "simulation.input"
+    assert template.outputname == "raspa.out"
 
 
 def test_notimplemented():
@@ -59,7 +64,7 @@ def test_template_write_input(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     template = RaspaTemplate()
     template.write_input(
-        tmp_path, bulk("Cu"), {"CutOff": 12.8}, RaspaProfile(), "energy"
+        RaspaProfile(), tmp_path, bulk("Cu"), {"CutOff": 12.8}, "energy"
     )
     assert (tmp_path / "simulation.input").exists()
     assert (
