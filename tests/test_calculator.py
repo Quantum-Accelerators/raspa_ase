@@ -140,12 +140,30 @@ def test_multi_frameworks(tmp_path):
     atoms1.info = {"HeliumVoidFraction": 0.75}
     atoms2 = bulk("Fe")
     atoms = Atoms()
-    atoms.calc = Raspa(directory=tmp_path, multiple_frameworks=[atoms1, atoms2])
+    atoms.calc = Raspa(
+        directory=tmp_path,
+        multiple_frameworks=[atoms1, atoms2],
+        boxes=[{"BoxLengths": [1, 2, 3]}, {"BoxLengths": [4, 5, 6]}],
+        parameters={"CutOff": 12.8},
+        components=[
+            {"MoleculeName": "N2", "MoleculeDefinition": "ExampleDefinition"},
+            {
+                "MoleculeName": "CO2",
+                "MoleculeDefinition": "ExampleDefinition",
+                "TranslationProbability": 1.0,
+            },
+        ],
+    )
     atoms.get_potential_energy()
     assert Path(tmp_path, "simulation.input").exists()
+    input_str = Path(tmp_path / "simulation.input").read_text()
     assert (
-        Path(tmp_path / "simulation.input").read_text()
-        == "Framework 0\n    FrameworkName framework0\n    UnitCells 12 12 12\n    HeliumVoidFraction 0.75\nFramework 1\n    FrameworkName framework1\n    UnitCells 12 12 12\n"
+        "Framework 0\n    FrameworkName framework0\n    UnitCells 12 12 12\n    HeliumVoidFraction 0.75\n"
+        in input_str
+    )
+    assert (
+        "Framework 1\n    FrameworkName framework1\n    UnitCells 12 12 12\n"
+        in input_str
     )
     assert Path(tmp_path / "framework0.cif").exists()
     assert Path(tmp_path / "framework1.cif").exists()
