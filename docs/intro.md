@@ -59,6 +59,10 @@ would write out the `_atom_site_charge` column in the CIF as 1.0 and 2.0 for ato
 
 If you don't specify a "UnitCells" entry in `atoms.info`, the RASPA calculator will ensure that the minimum image convention is satisfied based on your "CutOff" value. If a "CutOff" is not specified, the number of unit cells will be set based on a value of 12.0 Å for the cutoff.
 
+### Multiple Frameworks
+
+If you need to use multiple frameworks in your simulation, you should use apply the calculator to a blank `Atoms` object (i.e. `Atoms()`) and pass a `list[Atoms]` to the `multiple_frameworks` keyword argument.
+
 ## Boxes
 
 The optional `boxes` keyword argument, of type `list[dict]`, is a list where each entry is a given set of box parameters formatted as a dictionary.

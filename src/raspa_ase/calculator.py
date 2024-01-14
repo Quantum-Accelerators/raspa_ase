@@ -143,7 +143,7 @@ class RaspaTemplate(CalculatorTemplate):
         None
         """
         frameworks = [atoms]
-        parameters = merge_parameters(parameters, get_framework_params(frameworks))
+        parameters = merge_parameters(parameters, get_framework_params([atoms]))
 
         write_simulation_input(parameters, directory / SIMULATION_INPUT)
         write_frameworks(frameworks, directory)
@@ -196,6 +196,7 @@ class Raspa(GenericFileIOCalculator):
         boxes: list[dict[str, Any]] | None = None,
         components: list[dict[str, Any]] | None = None,
         parameters: dict[str, Any] | None = None,
+        multiple_frameworks: list[Atoms] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -247,51 +248,53 @@ class Raspa(GenericFileIOCalculator):
 
             Example:
 
-                ```python
-                boxes = [{"BoxLengths": [25, 25, 25], "ExternalTemperature": 300.0, "Movies": True, "WriteMoviesEvery": 10}, {"BoxLengths": [30, 30, 30], "BoxAngles": [90, 120, 90], "ExternalTemperature": 500.0, "Movies": True, "WriteMoviesEvery": 10}]
-                ```
+            ```python
+            boxes = [{"BoxLengths": [25, 25, 25], "ExternalTemperature": 300.0, "Movies": True, "WriteMoviesEvery": 10}, {"BoxLengths": [30, 30, 30], "BoxAngles": [90, 120, 90], "ExternalTemperature": 500.0, "Movies": True, "WriteMoviesEvery": 10}]
+            Raspa(boxes=boxes)
+            ```
 
-                would be written out as the following from 4.2 Example 2 of the RASPA manual:
+            would be written out as the following from 4.2 Example 2 of the RASPA manual:
 
-                ```
-                Box 0
-                    BoxLengths 25 25 25
-                    ExternalTemperature 300.0
-                    Movies yes
-                    WriteMoviesEvery 10
-                Box 1
-                    BoxLengths 30 30 30
-                    BoxAngles 90 120 90
-                    ExternalTemperature 500.0
-                    Movies yes
-                    WriteMoviesEvery 10
-                ```
+            ```
+            Box 0
+                BoxLengths 25 25 25
+                ExternalTemperature 300.0
+                Movies yes
+                WriteMoviesEvery 10
+            Box 1
+                BoxLengths 30 30 30
+                BoxAngles 90 120 90
+                ExternalTemperature 500.0
+                Movies yes
+                WriteMoviesEvery 10
+            ```
         components
             A list of dictionaries, where each dictionary is a RASPA component.
             The default is an empty list.
 
             Example:
 
-                ```python
-                components = [{"MolelculeName": "N2", "MoleculeDefinition": "ExampleDefinition", "TranslationProbability": 1.0, "RotationProbability": 1.0, "ReinsertionProbability": 1.0, "CreateNumberOfMolecules": [50, 25]}, {"MoleculeName": "CO2", "MoleculeDefinition": "ExampleDefinitions", "TranslationProbability": 1.0, "RotationProbability": 1.0, "ReinsertionProbability": 1.0, "CreateNumberOfMolecules": [25, 50]}]
-                ```
+            ```python
+            components = [{"MolelculeName": "N2", "MoleculeDefinition": "ExampleDefinition", "TranslationProbability": 1.0, "RotationProbability": 1.0, "ReinsertionProbability": 1.0, "CreateNumberOfMolecules": [50, 25]}, {"MoleculeName": "CO2", "MoleculeDefinition": "ExampleDefinitions", "TranslationProbability": 1.0, "RotationProbability": 1.0, "ReinsertionProbability": 1.0, "CreateNumberOfMolecules": [25, 50]}]
+            Raspa(components=components)
+            ```
 
-                would be written out as the following from 4.2 Example 2 of the RASPA manual:
+            would be written out as the following from 4.2 Example 2 of the RASPA manual:
 
-                ```
-                Component 0 MoleculeName N2
-                    MoleculeDefinition ExampleDefinitions
-                    TranslationProbability 1.0
-                    RotationProbability 1.0
-                    ReinsertionProbability 1.0
-                    CreateNumberOfMolecules 50 25
-                Component 1 MoleculeName CO2
-                    MoleculeDefinition ExampleDefinitions
-                    TranslationProbability 1.0
-                    RotationProbability 1.0
-                    ReinsertionProbability 1.0
-                    CreateNumberOfMolecules 25 50
-                ```
+            ```
+            Component 0 MoleculeName N2
+                MoleculeDefinition ExampleDefinitions
+                TranslationProbability 1.0
+                RotationProbability 1.0
+                ReinsertionProbability 1.0
+                CreateNumberOfMolecules 50 25
+            Component 1 MoleculeName CO2
+                MoleculeDefinition ExampleDefinitions
+                TranslationProbability 1.0
+                RotationProbability 1.0
+                ReinsertionProbability 1.0
+                CreateNumberOfMolecules 25 50
+            ```
         parameters
             Any RASPA parameters beyond the Box and Component parameters, formatted as a dictionary.
             Booleans will be converted to "Yes" or "No" automatically, and lists will be converted to
@@ -299,21 +302,49 @@ class Raspa(GenericFileIOCalculator):
 
             Example:
 
-                ```
-                parameters = {"SimulationType": "MonteCarlo", "NumberOfCycles": 10000, "NumberOfInitializationCycles": 1000, "PrintEvery": 100, "ForceField": "ExampleMoleculeForceField"}
+            ```
+            parameters = {"SimulationType": "MonteCarlo", "NumberOfCycles": 10000, "NumberOfInitializationCycles": 1000, "PrintEvery": 100, "ForceField": "ExampleMoleculeForceField"}
+            Raspa(parameters=parameters)
+            ```
+
+            would be written out as the following from 4.2 Example 2 of the RASPA manual:
+
+            ```
+            SimulationType MonteCarlo
+            NumberOfCycles 10000
+            NumberOfInitializationCycles 1000
+            PrintEvery 100
+            Forcefield ExampleMoleculeForceField
+            ```
+        multiple_frameworks
+                If you need to use multiple frameworks, then special treatment is required. Instead of
+                having the framework as the `Atoms` object, you need to supply a list of `Atoms` objects
+                to the `multiple_frameworks` keyword argument. In this case, the `Atoms` object
+                the calculator is applied to should be empty, i.e. `Atoms()`.
+
+                Example:
+
+                ```python
+                atoms1 = read("my_framework1.cif")
+                atoms2 = read("my_framework2.cif")
+                atoms1.info = {"UnitCells": [1, 1, 1]}
+                atoms2.info = {"HeliumVoidFraction": 0.25, "UnitCells": [4, 4, 4]}
+                Raspa(multiple_frameworks=[atoms1, atoms2])
                 ```
 
-                would be written out as the following from 4.2 Example 2 of the RASPA manual:
+                would be written out as the following:
 
                 ```
-                SimulationType MonteCarlo
-                NumberOfCycles 10000
-                NumberOfInitializationCycles 1000
-                PrintEvery 100
-                Forcefield ExampleMoleculeForceField
+                Framework 0
+                    FrameworkName framework0
+                    UnitCells 1 1 1
+                Framework 1
+                    FrameworkName framework1
+                    HeliumVoidFraction 0.25
+                    UnitCells 4 4 4
                 ```
-        **kwargs
-            Any additional arguments to pass to the `GenericFileIO` calculator.
+            **kwargs
+                Any additional arguments to pass to the `GenericFileIO` calculator.
 
         Returns
         -------
@@ -321,10 +352,14 @@ class Raspa(GenericFileIOCalculator):
         """
 
         profile = profile or RaspaProfile()
+        multiple_frameworks = multiple_frameworks or []
         boxes = boxes or []
         components = components or []
         parameters = parameters or {}
 
+        parameters = merge_parameters(
+            parameters, get_framework_params(multiple_frameworks)
+        )
         for i, component in enumerate(components):
             molecule_name = pop_parameter(component, "MoleculeName")
             parameters = merge_parameters(
