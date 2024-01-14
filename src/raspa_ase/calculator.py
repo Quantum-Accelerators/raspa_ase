@@ -55,7 +55,7 @@ class RaspaProfile:
     def run(
         self,
         directory: Path | str,
-        output_filename: Path | str,
+        output_filename: str,
     ) -> None:
         """
         Run the RASPA calculation.
