@@ -41,7 +41,9 @@ def get_framework_params(frameworks: list[Atoms]) -> dict[str, Any]:
         }
 
         if framework.has("initial_charges"):
-            framework_params = merge_parameters(framework_params, {"UseChargesFromCIFFile": True})
+            framework_params = merge_parameters(
+                framework_params, {"UseChargesFromCIFFile": True}
+            )
 
         parameters[f"Framework {i}"] = merge_parameters(
             framework_params,
