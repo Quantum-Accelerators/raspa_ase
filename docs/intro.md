@@ -11,7 +11,7 @@ from ase.io import read
 from raspa_ase import Raspa
 
 atoms = read("my_framework.cif")
-atoms.calc = Raspa()
+atoms.calc = Raspa(boxes=..., components=..., parameters=...)
 atoms.get_potential_energy()
 print(calc.results)
 ```
