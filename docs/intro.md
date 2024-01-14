@@ -62,7 +62,7 @@ boxes = [
     {"BoxLengths": [30, 30, 30]},
     {"BoxLengths": [40, 40, 40], "BoxAngles": [90, 120, 120]},
 ]
-Raspa(boxes=boxes)
+calc = Raspa(boxes=boxes)
 ```
 
 is equivalent to
@@ -88,6 +88,7 @@ components = [
     {"MoleculeName": "CO2", "MoleculeDefinition": "ExampleDefinitions"},
     {"MoleculeName": "N2", "MoleculeDefinition": "ExampleDefinitions"},
 ]
+calc = Raspa(components=components)
 ```
 
 is equivalent to
@@ -114,6 +115,7 @@ keywords = {
     "NumberOfInitializationCycles": 1000,
     "Movies": True,
 }
+calc = Raspa(keywords=keywords)
 ```
 
 is equivalent to
