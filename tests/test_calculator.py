@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -15,7 +16,10 @@ def test_profile_bad(monkeypatch):
 
 def test_profile():
     profile = RaspaProfile()
-    assert profile.argv == ["./bin/simulate", "simulation.input"]
+    assert profile.argv == [
+        f"{os.getenv('RASPA_DIR')}/bin/simulate",
+        "simulation.input",
+    ]
 
 
 def test_profile2():
@@ -25,7 +29,6 @@ def test_profile2():
 
 def test_run(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setenv("RASPA_DIR", "bad_dir")
     RaspaProfile().run(tmp_path, tmp_path / "simulation.input")
 
 
@@ -38,7 +41,7 @@ def test_template():
 def test_template_execute(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     template = RaspaTemplate()
-    template.execute("bad_dir", RaspaProfile())
+    template.execute(tmp_path, RaspaProfile())
 
 
 def test_template_write_input(monkeypatch, tmp_path):
