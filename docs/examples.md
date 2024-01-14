@@ -151,6 +151,6 @@ atoms.calc = calc
 atoms.get_potential_energy()
 ```
 
-1. This file is provided in `raspa_ase/docs/files/MFI_SI.cif` for the sake of this tutorial. The `Atoms` object represents the framework to be studied and will be written out to the current working directory to be used by RASPA.
+1. This file is provided in [`raspa_ase/docs/files/MFI_SI.cif`](https://github.com/Quantum-Accelerators/raspa_ase/blob/main/docs/files/MFI_SI.cif) for the sake of this tutorial. The `Atoms` object represents the framework to be studied and will be written out to the current working directory to be used by RASPA.
 
 2. The framework parameters are to be specified as `info` attributes of the `Atoms` object. You do not need to include the framework number or framework name. These will be included automatically.
