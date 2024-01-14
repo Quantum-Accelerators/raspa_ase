@@ -42,8 +42,11 @@ jobs:
       - name: Install conda packages
         run: conda install -c conda-forge raspa2
 
+      - name: Set up environment
+        run: export RASPA_DIR=/usr/share/miniconda
+
       - name: Run tests with pytest
-        run: pytest --cov=raspa_ase --cov-report=xml
+        run: pytest --noconftest --cov=raspa_ase --cov-report=xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
