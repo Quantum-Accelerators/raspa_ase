@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 from ase import Atoms
 from ase.build import bulk
+from ase.io import read
 
 from raspa_ase.calculator import Raspa, RaspaProfile, RaspaTemplate
 
@@ -146,3 +147,7 @@ def test_multi_frameworks(tmp_path):
         Path(tmp_path / "simulation.input").read_text()
         == "Framework 0\n    FrameworkName framework0\n    UnitCells 12 12 12\n    HeliumVoidFraction 0.75\nFramework 1\n    FrameworkName framework1\n    UnitCells 12 12 12\n"
     )
+    assert Path(tmp_path / "framework0.cif").exists()
+    assert Path(tmp_path / "framework1.cif").exists()
+    assert read(tmp_path / "framework0.cif")[0].symbol == "Cu"
+    assert read(tmp_path / "framework1.cif")[0].symbol == "Fe"
