@@ -188,7 +188,7 @@ class RaspaTemplate(CalculatorTemplate):
         RaspaProfile
             The RASPA profile.
         """
-        return RaspaProfile.from_config(cfg, self.name, **kwargs)
+        raise NotImplementedError
 
 
 class Raspa(GenericFileIOCalculator):

@@ -39,6 +39,12 @@ def test_template():
     assert template.output_file == "raspa.out"
 
 
+def test_notimplemented():
+    template = RaspaTemplate()
+    with pytest.raises(NotImplementedError):
+        template.load_profile(None)
+
+
 def test_template_execute(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     with Path(tmp_path / "simulation.input").open(mode="w") as fd:
