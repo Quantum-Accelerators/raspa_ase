@@ -317,34 +317,34 @@ class Raspa(GenericFileIOCalculator):
             Forcefield ExampleMoleculeForceField
             ```
         multiple_frameworks
-                If you need to use multiple frameworks, then special treatment is required. Instead of
-                having the framework as the `Atoms` object, you need to supply a list of `Atoms` objects
-                to the `multiple_frameworks` keyword argument. In this case, the `Atoms` object
-                the calculator is applied to should be empty, i.e. `Atoms()`.
+            If you need to use multiple frameworks, then special treatment is required. Instead of
+            having the framework as the `Atoms` object, you need to supply a list of `Atoms` objects
+            to the `multiple_frameworks` keyword argument. In this case, the `Atoms` object
+            the calculator is applied to should be empty, i.e. `Atoms()`.
 
-                Example:
+            Example:
 
-                ```python
-                atoms1 = read("my_framework1.cif")
-                atoms2 = read("my_framework2.cif")
-                atoms1.info = {"UnitCells": [1, 1, 1]}
-                atoms2.info = {"HeliumVoidFraction": 0.25, "UnitCells": [4, 4, 4]}
-                Raspa(multiple_frameworks=[atoms1, atoms2])
-                ```
+            ```python
+            atoms1 = read("my_framework1.cif")
+            atoms2 = read("my_framework2.cif")
+            atoms1.info = {"UnitCells": [1, 1, 1]}
+            atoms2.info = {"HeliumVoidFraction": 0.25, "UnitCells": [4, 4, 4]}
+            Raspa(multiple_frameworks=[atoms1, atoms2])
+            ```
 
-                would be written out as the following:
+            would be written out as the following:
 
-                ```
-                Framework 0
-                    FrameworkName framework0
-                    UnitCells 1 1 1
-                Framework 1
-                    FrameworkName framework1
-                    HeliumVoidFraction 0.25
-                    UnitCells 4 4 4
-                ```
-            **kwargs
-                Any additional arguments to pass to the `GenericFileIO` calculator.
+            ```
+            Framework 0
+                FrameworkName framework0
+                UnitCells 1 1 1
+            Framework 1
+                FrameworkName framework1
+                HeliumVoidFraction 0.25
+                UnitCells 4 4 4
+            ```
+        **kwargs
+            Any additional arguments to pass to the `GenericFileIO` calculator.
 
         Returns
         -------
