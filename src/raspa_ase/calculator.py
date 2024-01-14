@@ -170,13 +170,11 @@ class RaspaTemplate(CalculatorTemplate):
         systems = Path(output_path).glob("System_*")
         results = {"energy": None}
         for system in systems:
-            system_number = int(system.name.split("_")[1])
             data_files = Path(system).glob("*.data")
-            results[f"System_{system_number}"] = {}
+            results[system.name] = {}
             for data_file in data_files:
-                data_file_name = data_file.name.split(".data")[0]
                 output = parse_output(data_file)
-                results[f"System_{system_number}"][data_file_name] = output
+                results[system.name][data_file.name] = output
         return results
 
     def load_profile(self, cfg, **kwargs) -> RaspaProfile:

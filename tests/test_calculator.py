@@ -179,7 +179,8 @@ def test_multi_frameworks(tmp_path):
     assert read(tmp_path / "framework1.cif")[0].symbol == "Fe"
 
 
-def test_example():
+@pytest.mark.skipif("RASPA_DIR" not in os.environ, reason="This test requires RASPA")
+def test_example(tmp_path):
     atoms = Atoms()
     boxes = [
         {
@@ -204,16 +205,19 @@ def test_example():
         "PrintEvery": 10,
         "Forcefield": "ExampleMoleculeForceField",
     }
-    calc = Raspa(boxes=boxes, components=components, parameters=parameters)
+    calc = Raspa(
+        directory=tmp_path, boxes=boxes, components=components, parameters=parameters
+    )
 
     atoms.calc = calc
     atoms.get_potential_energy()
     assert "System_0" in calc.results
-    assert "output_Box_1.1.1_300.000000_0" in calc.results["System_0"]
+    assert "output_Box_1.1.1_300.000000_0.data" in calc.results["System_0"]
     assert calc.results["System_0"]["output_Box_1"]["Simulation"]["Dimensions"] == [3.0]
 
 
-def test_example2():
+@pytest.mark.skipif("RASPA_DIR" not in os.environ, reason="This test requires RASPA")
+def test_example2(tmp_path):
     atoms = Atoms()
     boxes = [
         {
@@ -250,24 +254,27 @@ def test_example2():
     ]
     parameters = {
         "SimulationType": "MonteCarlo",
-        "NumberOfCycles": 100,
+        "NumberOfCycles": 20,
         "NumberOfInitializationCycles": 10,
         "PrintEvery": 10,
         "Forcefield": "ExampleMoleculeForceField",
     }
-    calc = Raspa(boxes=boxes, components=components, parameters=parameters)
+    calc = Raspa(
+        directory=tmp_path, boxes=boxes, components=components, parameters=parameters
+    )
 
     atoms.calc = calc
     atoms.get_potential_energy()
     assert "System_0" in calc.results
     assert "System_1" in calc.results
-    assert "output_Box_1.1.1_500.000000_0" in calc.results["System_0"]
-    assert "output_Box_1.1.1_500.000000_0" in calc.results["System_1"]
+    assert "output_Box_1.1.1_500.000000_0.data" in calc.results["System_0"]
+    assert "output_Box_1.1.1_500.000000_0.data" in calc.results["System_1"]
 
 
-def test_example3():
+@pytest.mark.skipif("RASPA_DIR" not in os.environ, reason="This test requires RASPA")
+def test_example3(tmp_path):
     atoms = read(Path(DATA_DIR / "MFI_SI.cif"))
-    atoms.info = {  # (2)!
+    atoms.info = {
         "UnitCells": [2, 2, 2],
         "HeliumVoidFraction": 0.29,
         "ExternalTemperature": 300.0,
@@ -300,7 +307,10 @@ def test_example3():
         "EnergyHistogramLowerLimit": -110000,
         "EnergyHistogramUpperLimit": -20000,
     }
-    calc = Raspa(components=components, parameters=parameters)
+    calc = Raspa(directory=tmp_path, components=components, parameters=parameters)
 
     atoms.calc = calc
     atoms.get_potential_energy()
+    assert "System_0" in calc.results
+    assert "output_framework0_2.2.2_300.000000_10000.data" in calc.results["System_0"]
+    assert "output_framework0_2.2.2_300.000000_100000.data" in calc.results["System_0"]
