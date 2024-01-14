@@ -43,8 +43,7 @@ jobs:
         run: conda install -c conda-forge raspa2
 
       - name: Set up environment
-        env:
-          RASPA_DIR: /usr/share/miniconda
+        run: echo "RASPA_DIR=/usr/share/miniconda" >> "$GITHUB_ENV"
 
       - name: Run tests with pytest
         run: pytest --noconftest --cov=raspa_ase --cov-report=xml
