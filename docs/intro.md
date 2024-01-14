@@ -13,7 +13,10 @@ from raspa_ase import Raspa
 atoms = read("my_framework.cif")
 atoms.calc = Raspa()
 atoms.get_potential_energy()
+print(calc.results)
 ```
+
+Tabulated results can be found in the `calc.results` dictionary.
 
 ## Framework Properties
 

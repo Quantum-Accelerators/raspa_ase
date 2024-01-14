@@ -1,0 +1,27 @@
+SimulationType MonteCarlo
+NumberOfCycles 25
+NumberOfInitializationCycles 2
+PrintEvery 5
+Forcefield ExampleZeolitesForceField
+RemoveAtomNumberCodeFromLabel Yes
+ComputeNumberOfMoleculesHistogram Yes
+WriteNumberOfMoleculesHistogramEvery 5
+NumberOfMoleculesHistogramSize 5
+NumberOfMoleculesRange 5
+ComputeEnergyHistogram Yes
+WriteEnergyHistogramEvery 5
+EnergyHistogramSize 5
+EnergyHistogramLowerLimit -110000
+EnergyHistogramUpperLimit -20000
+Component 0 MoleculeName methane
+    MoleculeDefinition ExampleDefinitions
+    TranslationProbability 0.5
+    ReinsertionProbability 0.5
+    SwapProbability 1.0
+    CreateNumberOfMolecules 0
+Framework 0
+    FrameworkName framework0
+    UnitCells 2 2 2
+    HeliumVoidFraction 0.29
+    ExternalTemperature 300.0
+    ExternalPressure 10000.0 100000.0
