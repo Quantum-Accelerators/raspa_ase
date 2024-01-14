@@ -172,7 +172,7 @@ class RaspaTemplate(CalculatorTemplate):
         Parameters
         ----------
         cfg
-            The RASPA configuration file, if any.
+            The ASE configuration profile, if any.
         **kwargs
             Any additional arguments to pass to the RASPA profile.
 
