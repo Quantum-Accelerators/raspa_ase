@@ -4,10 +4,13 @@ from raspa_ase.utils.io import write_frameworks, write_simulation_input
 
 
 def test_write_simulation_input(tmp_path):
-    parameters = {"a": 1, "b": [2, 3], "c": {"d": 4, "e": False}}
+    parameters = {"a": 1, "b": [2, 3], "c": {"d": 4, "e": False, "f": {"g": 5}}}
     input_filepath = tmp_path / "simulation.input"
     write_simulation_input(parameters, input_filepath)
-    assert input_filepath.read_text() == "a 1\nb 2 3\nc\n    d 4\n    e No\n"
+    assert (
+        input_filepath.read_text().strip()
+        == "a 1\nb 2 3\nc\n    d 4\n    e No\n    f\n        g 5"
+    )
 
 
 def test_write_frameworks(tmp_path):

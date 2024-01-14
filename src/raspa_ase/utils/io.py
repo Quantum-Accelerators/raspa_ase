@@ -272,11 +272,10 @@ def _dict_to_str(d: dict[str, Any]) -> str:
     """
     s = ""
     for k, v in d.items():
-        s += f"    {k} "
         if isinstance(v, dict):
-            s += _dict_to_str(v)
+            s += f"    {k}\n    " + _dict_to_str(v)
         elif isinstance(v, Iterable) and not isinstance(v, str):
-            s += _iterable_to_str(v)
+            s += f"    {k} " + _iterable_to_str(v)
         else:
-            s += f"{v}\n"
+            s += f"    {k} {v}\n"
     return s
