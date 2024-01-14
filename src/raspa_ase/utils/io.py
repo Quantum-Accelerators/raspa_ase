@@ -199,7 +199,7 @@ def parse_output(filepath: str | Path) -> dict[str, Any]:
                 # Average for each columns
                 elif "Average" in item:
                     avg = _clean(re.split(r"\s{2,}", item))
-                    vdw, coulomb = [_clean(s.split(": ")) for s in avg[2:4]]
+                    vdw, coulomb = (_clean(s.split(": ")) for s in avg[2:4])
                     d[avg[0]] = avg[1]
                     d["Average %s" % vdw[0]] = vdw[1]
                     d["Average %s" % coulomb[0]] = coulomb[1]
