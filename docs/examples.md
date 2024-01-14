@@ -157,10 +157,6 @@ atoms.get_potential_energy()
 
 ## Example 8: Adsorption isotherm of CO2 in Cu-BTC
 
-!!! Note
-
-    This example is not ready yet since support for charges is ongoing.
-
 ```python
 from ase.io import read
 from raspa_ase import Raspa

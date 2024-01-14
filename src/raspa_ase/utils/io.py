@@ -70,7 +70,7 @@ def write_frameworks(frameworks: list[Atoms], directory: str | Path) -> None:
         name = f"framework{i}"
 
         structure = AseAtomsAdaptor.get_structure(framework)
-        structure.to(str(Path(directory, name + ".cif")))
+        structure.to(str(Path(directory, name + ".cif")), write_site_properties=True)
 
 
 def _iterable_to_str(v: list[Any]) -> str:
