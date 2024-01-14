@@ -2,7 +2,7 @@
 
 ## RASPA
 
-First, install RASPA based on the [official instructions](https://iraspa.org/raspa/).
+First, install RASPA based on the [official instructions](https://iraspa.org/raspa/) and set the `$RASPA_DIR` environment variable as instructed.
 
 !!! Tip
 
