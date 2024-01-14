@@ -86,7 +86,8 @@ class RaspaTemplate(CalculatorTemplate):
         )
 
         self.inputname = SIMULATION_INPUT
-        self.outputname = "raspa.out"
+        self.outputname = "raspa.stdout"
+        self.errorfile = "raspa.stderr"
         self.frameworks = frameworks
 
     def write_input(
@@ -124,7 +125,12 @@ class RaspaTemplate(CalculatorTemplate):
         write_frameworks(frameworks, directory)
 
     def execute(self, directory: Path | str, profile: RaspaProfile) -> None:
-        profile.run(directory, self.inputname, directory / self.outputname)
+        profile.run(
+            directory,
+            self.inputname,
+            directory / self.outputname,
+            errorfile=self.errorfile,
+        )
 
     @staticmethod
     def read_results(directory: Path | str) -> dict[str, Any]:

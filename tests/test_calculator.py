@@ -43,7 +43,8 @@ def test_profil2e():
 def test_template():
     template = RaspaTemplate()
     assert template.inputname == "simulation.input"
-    assert template.outputname == "raspa.out"
+    assert template.outputname == "raspa.stdout"
+    assert template.errorfile == "raspa.stderr"
 
 
 def test_notimplemented():
