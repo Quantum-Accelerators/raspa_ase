@@ -89,6 +89,18 @@ def parse_output(filepath: str | Path) -> dict[str, Any]:
     dict
         The parsed output data.
     """
+
+    def _clean(split_list: list[str]) -> list[float]:
+        """Strips and attempts to convert a list of strings to floats."""
+
+        def try_float(s):
+            try:
+                return float(s)
+            except ValueError:
+                return s
+
+        return [try_float(s.strip()) for s in split_list if s]
+
     with Path(filepath).open(mode="r") as fd:
         raspa_output = fd.read()
 
@@ -225,18 +237,6 @@ def parse_output(filepath: str | Path) -> dict[str, Any]:
         info[key] = d
 
     return info
-
-
-def _clean(split_list):
-    """Strips and attempts to convert a list of strings to floats."""
-
-    def try_float(s):
-        try:
-            return float(s)
-        except ValueError:
-            return s
-
-    return [try_float(s.strip()) for s in split_list if s]
 
 
 def _iterable_to_str(v: list[Any]) -> str:
