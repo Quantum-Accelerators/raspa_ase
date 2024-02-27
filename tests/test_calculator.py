@@ -128,6 +128,7 @@ def test_raspa_functional1(tmp_path):
 
 def test_raspa_functional2(tmp_path):
     atoms = bulk("Cu")
+    atoms.set_initial_charges([1.0] * len(atoms))
     atoms.calc = Raspa(
         directory=tmp_path,
         boxes=[{"BoxLengths": [1, 2, 3]}, {"BoxLengths": [4, 5, 6]}],
@@ -145,7 +146,7 @@ def test_raspa_functional2(tmp_path):
     assert Path(tmp_path, "simulation.input").exists()
     assert (
         Path(tmp_path / "simulation.input").read_text()
-        == "CutOff 12.8\nComponent 0 MoleculeName N2\n    MoleculeDefinition ExampleDefinition\nComponent 1 MoleculeName CO2\n    MoleculeDefinition ExampleDefinition\n    TranslationProbability 1.0\nBox 0\n    BoxLengths 1 2 3\nBox 1\n    BoxLengths 4 5 6\nFramework 0\n    FrameworkName framework0\n    UnitCells 12 12 12\n"
+        == "CutOff 12.8\nComponent 0 MoleculeName N2\n    MoleculeDefinition ExampleDefinition\nComponent 1 MoleculeName CO2\n    MoleculeDefinition ExampleDefinition\n    TranslationProbability 1.0\nBox 0\n    BoxLengths 1 2 3\nBox 1\n    BoxLengths 4 5 6\nFramework 0\n    FrameworkName framework0\n    UnitCells 12 12 12\n    UseChargesFromCIFFile Yes\n"
     )
 
 

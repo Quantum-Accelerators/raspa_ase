@@ -25,8 +25,7 @@ def get_framework_params(frameworks: list[Atoms]) -> dict[str, Any]:
     dict
         The framework-related parameters.
     """
-    # TODO: Add support for writing charges to CIF
-    # with _atom_site_charge and in RASPA set UseChargesFromCIFFile yes
+
     parameters = {}
     for i, framework in enumerate(frameworks):
         if framework == Atoms():
@@ -36,13 +35,21 @@ def get_framework_params(frameworks: list[Atoms]) -> dict[str, Any]:
         cutoff = get_parameter(parameters, "CutOff", default=12.0)
         n_cells = get_suggested_cells(framework, cutoff)
 
+        framework_params = {
+            "FrameworkName": name,
+            "UnitCells": n_cells,
+        }
+
+        if framework.has("initial_charges"):
+            framework_params = merge_parameters(
+                framework_params, {"UseChargesFromCIFFile": True}
+            )
+
         parameters[f"Framework {i}"] = merge_parameters(
-            {
-                "FrameworkName": name,
-                "UnitCells": n_cells,
-            },
+            framework_params,
             framework.info,
         )
+
     return parameters
 
 

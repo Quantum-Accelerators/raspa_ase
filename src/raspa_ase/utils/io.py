@@ -71,7 +71,7 @@ def write_frameworks(frameworks: list[Atoms], directory: str | Path) -> None:
         name = f"framework{i}"
 
         structure = AseAtomsAdaptor.get_structure(framework)
-        structure.to(str(Path(directory, name + ".cif")))
+        structure.to(str(Path(directory, name + ".cif")), write_site_properties=True)
 
 
 def parse_output(filepath: str | Path) -> dict[str, Any]:
