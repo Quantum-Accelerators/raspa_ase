@@ -19,5 +19,5 @@ pip install --force-reinstall --no-deps https://gitlab.com/ase/ase/-/archive/mas
 Then install `raspa_ase`:
 
 ```bash
-pip install git+https://github.com/Quantum-Accelerators/raspa_ase.git
+pip install raspa-ase
 ```
