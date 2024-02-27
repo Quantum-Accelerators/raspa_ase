@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "raspa_ase"
 description="An ASE calculator for the RASPA molecular simulation package."
-version = "0.0.1"
+version = "0.0.2"
 readme = "README.md"
 license = { text = "BSD-3" }
 authors = [{ name = "Andrew S. Rosen", email = "asrosen@princeton.edu" }]
