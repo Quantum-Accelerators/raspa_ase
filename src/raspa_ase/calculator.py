@@ -1,6 +1,7 @@
 """
 ASE calculator for RASPA
 """
+
 from __future__ import annotations
 
 import os
@@ -148,8 +149,8 @@ class RaspaTemplate(CalculatorTemplate):
         profile.run(
             directory,
             self.inputname,
-            directory / self.outputname,
-            errorfile=directory / self.errorfile,
+            self.outputname,
+            errorfile=self.errorfile,
         )
 
     @staticmethod
