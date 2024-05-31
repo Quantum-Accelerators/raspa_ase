@@ -10,13 +10,7 @@ First, install RASPA based on the [official instructions](https://iraspa.org/ras
 
 ## ASE Calculator
 
-To use `raspa_ase`, first install the latest version of ASE:
-
-```bash
-pip install --force-reinstall --no-deps https://gitlab.com/ase/ase/-/archive/master/ase-master.zip
-```
-
-Then install `raspa_ase`:
+To use `raspa_ase`:
 
 ```bash
 pip install raspa-ase
