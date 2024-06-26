@@ -67,7 +67,7 @@ class RaspaProfile(BaseProfile):
         list[str]
             The command to run the calculator.
         """
-        return [self.binary, f"{inputfile}"]
+        return [self.command, f"{inputfile}"]
 
     def version(self) -> str:
         """
