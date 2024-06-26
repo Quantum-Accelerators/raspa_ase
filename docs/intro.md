@@ -64,7 +64,7 @@ If you don't specify a "UnitCells" entry in `atoms.info`, the RASPA calculator w
 
 ### Multiple Frameworks
 
-If you need to use multiple frameworks in your simulation, you should use apply the calculator to a blank `Atoms` object (i.e. `Atoms()`) and pass a `list[Atoms]` to the `multiple_frameworks` keyword argument.
+If you need to use multiple frameworks in your simulation, you should apply the calculator to a blank `Atoms` object (i.e. `Atoms()`) and pass a `list[Atoms]` to the `multiple_frameworks` keyword argument.
 
 ## Boxes
 
