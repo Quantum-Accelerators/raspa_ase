@@ -19,7 +19,7 @@ def test_profile_bad(monkeypatch):
 
 def test_profile():
     profile = RaspaProfile()
-    assert profile.binary == f"{os.getenv('RASPA_DIR')}/bin/simulate"
+    assert profile.command == f"{os.getenv('RASPA_DIR')}/bin/simulate"
 
     assert profile.get_calculator_command() == [
         f"{os.getenv('RASPA_DIR')}/bin/simulate",
@@ -31,8 +31,8 @@ def test_profile():
 
 
 def test_profil2e():
-    profile = RaspaProfile(binary="my/path")
-    assert profile.binary == "my/path"
+    profile = RaspaProfile(command="my/path")
+    assert profile.command == "my/path"
 
     assert profile.get_calculator_command() == [
         "my/path",

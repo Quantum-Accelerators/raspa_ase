@@ -32,27 +32,26 @@ class RaspaProfile(BaseProfile):
     RASPA profile, which defines the command that will be executed and where.
     """
 
-    def __init__(self, binary: Path | str | None = None, **kwargs) -> None:
+    def __init__(self, command: Path | str | None = None, **kwargs) -> None:
         """
         Initialize the RASPA profile. $RASPA_DIR must be set in the environment.
 
         Parameters
         ----------
-        binary
-            The binary to run RASPA. This defaults to doing `${RASPA_DIR}/bin/simulate`
+        command
+            The command to run RASPA. This defaults to doing `${RASPA_DIR}/bin/simulate`
             and typically does not need to be changed.
 
         Returns
         -------
         None
         """
-        super().__init__(**kwargs)
-        if not binary:
+        if not command:
             raspa_dir = os.environ.get("RASPA_DIR")
             if not raspa_dir:
                 raise OSError("RASPA_DIR environment variable not set")
-            binary = f"{raspa_dir}/bin/simulate"
-        self.binary = binary
+            command = f"{raspa_dir}/bin/simulate"
+        super().__init__(command, **kwargs)
 
     def get_calculator_command(self, inputfile: str = SIMULATION_INPUT) -> list[str]:
         """
@@ -68,7 +67,7 @@ class RaspaProfile(BaseProfile):
         list[str]
             The command to run the calculator.
         """
-        return [self.binary, f"{inputfile}"]
+        return [self.command, f"{inputfile}"]
 
     def version(self) -> str:
         """
