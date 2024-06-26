@@ -120,10 +120,6 @@ extend-exclude = ["tests"]
 pydocstyle.convention = "numpy"
 isort.known-first-party = ["raspa_ase"]
 
-[tool.docformatter]
-pre-summary-newline = true
-black = true
-
 [tool.mypy]
 ignore_missing_imports = true
 namespace_packages = true
